@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore North-East India</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #f5f9fc;
+      color: #222;
+      line-height: 1.6;
+      /* Background image */
+  background: url('back.jpg') no-repeat center center fixed;
+  background-size: cover; /* Perfect fit */
+
+  /* Use a semi-transparent overlay */
+  position: relative;
+    }
+
+    header {
+      background: linear-gradient(90deg, #0b6ba5, #063f5e);
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 800;
+    }
+
+    header p {
+      margin-top: 10px;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .state-card {
+      background: #fff;
+      margin-bottom: 40px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .state-card img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+    }
+
+    .state-content {
+      padding: 20px;
+    }
+
+    .state-content h2 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      color: #0b6ba5;
+    }
+
+    .state-content p {
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+
+    .fun-fact {
+      background: #eaf6ff;
+      border-left: 5px solid #0b6ba5;
+      padding: 12px 16px;
+      margin-top: 15px;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+
+    /* Back button styling */
+    .back-button {
+      text-align: center;
+      margin: 40px 0;
+    }
+
+    .back-button button {
+      background: #0b6ba5;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .back-button button:hover {
+      background: #063f5e;
+    }
+
+    @media (min-width: 768px) {
+      .state-card {
+        flex-direction: row;
+      }
+      .state-card img {
+        width: 40%;
+        height: auto;
+      }
+      .state-content {
+        width: 60%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Explore the Seven Sisters & their Brother</h1>
+    <p>Discover the vibrant states of North-East India — rich in culture, nature, and traditions.</p>
+  </header>
+
+  <div class="container">
+    <!-- Assam -->
+    <div class="state-card">
+      <img src="assam.jpg" alt="Kaziranga National Park, Assam">
+      <div class="state-content">
+        <h2>Assam</h2>
+        <p>Assam is the gateway to North-East India and is world-famous for its tea gardens, one-horned rhinoceroses at Kaziranga National Park, and the mighty Brahmaputra River. The cultural life of Assam is enriched by Bihu festivals, traditional silk weaving, and Satras of Majuli Island — the world’s largest river island.</p>
+        <div class="fun-fact">☕ Fun Fact: Assam produces more than half of India’s tea, making it the Tea Capital of the World!</div>
+      </div>
+    </div>
+
+    <!-- Meghalaya -->
+    <div class="state-card">
+      <img src="meghalaya.jpg" alt="Living Root Bridges, Meghalaya">
+      <div class="state-content">
+        <h2>Meghalaya</h2>
+        <p>Known as the “Abode of Clouds,” Meghalaya is home to rolling hills, stunning waterfalls, and the iconic Living Root Bridges. Shillong, often called the Scotland of the East, is a hub of music, cafes, and culture. Cherrapunjee and Mawsynram are among the wettest places on Earth, making them lush green paradises.</p>
+        <div class="fun-fact">🌧️ Fun Fact: Meghalaya receives so much rain that villagers sometimes carry umbrellas made of bamboo and banana leaves bigger than themselves!</div>
+      </div>
+    </div>
+
+    <!-- Arunachal Pradesh -->
+    <div class="state-card">
+      <img src="ap.jpg" alt="Tawang Monastery, Arunachal Pradesh">
+      <div class="state-content">
+        <h2>Arunachal Pradesh</h2>
+        <p>Arunachal Pradesh is India’s land of the rising sun, blessed with snow-capped mountains, lush valleys, and ancient monasteries. Tawang Monastery is one of the largest Buddhist monasteries outside Tibet. Adventure seekers flock here for treks, rafting, and bird watching in the dense forests.</p>
+        <div class="fun-fact">🌄 Fun Fact: Arunachal Pradesh sees the first sunrise in India, making it the earliest riser in the country!</div>
+      </div>
+    </div>
+
+    <!-- Nagaland -->
+    <div class="state-card">
+      <img src="nagaland.jpg" alt="Hornbill Festival, Nagaland">
+      <div class="state-content">
+        <h2>Nagaland</h2>
+        <p>Nagaland is vibrant with tribal culture, colorful festivals, and lush hills. The Hornbill Festival, known as the Festival of Festivals, showcases the rich traditions of its 16 tribes. Trekkers are drawn to the Dzükou Valley, famous for its seasonal flowers and stunning landscapes.</p>
+        <div class="fun-fact">🎉 Fun Fact: The Hornbill Festival is so lively it’s called the “Woodstock of the East.”</div>
+      </div>
+    </div>
+
+    <!-- Manipur -->
+    <div class="state-card">
+      <img src="manipur.jpg" alt="Loktak Lake, Manipur">
+      <div class="state-content">
+        <h2>Manipur</h2>
+        <p>Manipur, the “Jewel of India,” is famous for its scenic beauty, dance forms, and Loktak Lake — the only floating lake in the world with phumdis (floating biomass). Manipur is also known for the classical Manipuri dance and the Sangai Festival.</p>
+        <div class="fun-fact">💃 Fun Fact: Polo, often called the sport of kings, is believed to have originated in Manipur!</div>
+      </div>
+    </div>
+
+    <!-- Mizoram -->
+    <div class="state-card">
+      <img src="mizoram.jpg" alt="Aizawl, Mizoram">
+      <div class="state-content">
+        <h2>Mizoram</h2>
+        <p>Mizoram is blessed with rolling hills, bamboo forests, and a peaceful atmosphere. Its capital, Aizawl, offers panoramic views of mountains and valleys. Mizoram is also known for its handloom products, bamboo dance (Cheraw), and warm hospitality.</p>
+        <div class="fun-fact">🎶 Fun Fact: Mizoram is often called the “Songbird of the East” because music is a way of life here!</div>
+      </div>
+    </div>
+
+    <!-- Tripura -->
+    <div class="state-card">
+      <img src="tripura.jpg" alt="Ujjayanta Palace, Tripura">
+      <div class="state-content">
+        <h2>Tripura</h2>
+        <p>Tripura combines royal heritage with natural beauty. The Ujjayanta Palace and Neermahal (a lake palace) reflect its regal history, while Unakoti features ancient rock carvings. The state is also known for bamboo and cane crafts.</p>
+        <div class="fun-fact">🏰 Fun Fact: Neermahal is the only water palace in Eastern India!</div>
+      </div>
+    </div>
+
+    <!-- Sikkim -->
+    <div class="state-card">
+      <img src="sikkim1.jpg" alt="Nathula Pass, Sikkim">
+      <div class="state-content">
+        <h2>Sikkim (The Brother)</h2>
+        <p>Sikkim, the only brother among the Seven Sisters, is a Himalayan paradise. It is home to snow-clad peaks, monasteries, and alpine meadows. Nathula Pass connects India with Tibet, while Gurudongmar Lake is among the highest lakes in the world. Sikkim is also India’s first fully organic state.</p>
+        <div class="fun-fact">🍃 Fun Fact: Sikkim banned chemical fertilizers and became the first 100% organic state in India!</div>
+      </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-button">
+      <button onclick="window.location.href='frontsheet.html'">⬅ Back to Home</button>
+    </div>
+  </div>
+</body>
+</html>

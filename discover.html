@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover North-East India</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+      /* Background image */
+  background: url('back.jpg') no-repeat center center fixed;
+  background-size: cover; /* Perfect fit */
+
+  /* Use a semi-transparent overlay */
+  position: relative;
+    }
+
+    header {
+      background: #2e8b57;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+
+    section {
+      padding: 3rem 2rem;
+    }
+
+    section h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: #2e8b57;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 1.2rem;
+    }
+
+    .card-content h3 {
+      margin-top: 0;
+      color: #444;
+    }
+
+    .card-content p {
+      line-height: 1.6;
+    }
+     /* Back button styling */
+    .back-button {
+      text-align: center;
+      margin: 40px 0;
+    }
+
+    .back-button button {
+      background: #0b6ba5;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .back-button button:hover {
+      background: #063f5e;
+    }
+
+    @media (min-width: 768px) {
+      .state-card {
+        flex-direction: row;
+      }
+      .state-card img {
+        width: 40%;
+        height: auto;
+      }
+      .state-content {
+        width: 60%;
+      }
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #2e8b57;
+      color: white;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Discover North-East India</h1>
+    <p>Dive into destinations, activities, culture, and travel tips of the enchanting region.</p>
+  </header>
+
+  <!-- Top Destinations -->
+  <section>
+    <h2>🌍 Top Destinations</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="ap.jpg" alt="Tawang">
+        <div class="card-content">
+          <h3>Tawang, Arunachal Pradesh</h3>
+          <p>Famous for its majestic monastery, snow-capped peaks, and stunning landscapes. A perfect blend of spirituality and adventure.</p>
+          <p><b>Fun Fact:</b> Tawang Monastery is the second largest in the world!</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="meghalaya.jpg" alt="Cherrapunjee">
+        <div class="card-content">
+          <h3>Cherrapunjee, Meghalaya</h3>
+          <p>Known as one of the wettest places on Earth, home to living root bridges and lush greenery everywhere you look.</p>
+          <p><b>Fun Fact:</b> Locals use living tree roots to build natural bridges!</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="manipur.jpg" alt="Loktak Lake">
+        <div class="card-content">
+          <h3>Loktak Lake, Manipur</h3>
+          <p>The only floating lake in the world, dotted with circular phumdis (floating islands of vegetation).</p>
+          <p><b>Fun Fact:</b> Loktak Lake hosts the rare Sangai deer!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activities -->
+  <section>
+    <h2>🏞️ Activities</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="trekking.jpg" alt="Trekking">
+        <div class="card-content">
+          <h3>Trekking</h3>
+          <p>From the trails of Sikkim’s Goecha La to Arunachal’s Ziro Valley, trekking offers breathtaking Himalayan views and cultural encounters.</p>
+          <p><b>Tip:</b> Best done from March to June or September to November.</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="river.jpg" alt="Rafting">
+        <div class="card-content">
+          <h3>River Rafting</h3>
+          <p>The Brahmaputra and Teesta rivers are adventure hubs for thrilling white-water rafting experiences.</p>
+          <p><b>Fun Fact:</b> The Brahmaputra is one of the few rivers that can be rafted in monsoon season!</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="nagaland.jpg" alt="Festivals">
+        <div class="card-content">
+          <h3>Festivals</h3>
+          <p>Celebrate Nagaland’s Hornbill Festival, Assam’s Bihu, and Manipur’s Sangai Festival — all bursting with dance, food, and traditions.</p>
+          <p><b>Fun Fact:</b> Hornbill Festival is called the "Festival of Festivals".</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Culture -->
+  <section>
+    <h2>🎭 Culture</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="dance.jpg" alt="Dance">
+        <div class="card-content">
+          <h3>Dance & Music</h3>
+          <p>From Bihu in Assam to Cheraw (bamboo dance) in Mizoram, every state has unique dance forms and soulful music traditions.</p>
+          <p><b>Fun Fact:</b> Cheraw uses long bamboo sticks that dancers step in and out of rhythmically!</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="food.jpg" alt="Food">
+        <div class="card-content">
+          <h3>Food</h3>
+          <p>Naga smoked pork, Assamese thali, Manipuri black rice pudding, and Sikkimese momos — the cuisine is diverse and flavorful.</p>
+          <p><b>Fun Fact:</b> Bhut Jolokia (Ghost Pepper) from Assam is one of the spiciest chilies in the world!</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="craft.jpg" alt="Crafts">
+        <div class="card-content">
+          <h3>Handicrafts</h3>
+          <p>Bamboo and cane products, handwoven textiles, and traditional ornaments showcase the artistry of local communities.</p>
+          <p><b>Fun Fact:</b> Assam’s silk (Muga & Eri) is found nowhere else in the world!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Travel Tips -->
+  <section>
+    <h2>🧳 Travel Tips</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="monsoon.jpg" alt="Weather">
+        <div class="card-content">
+          <h3>Best Time to Visit</h3>
+          <p>October to May is ideal for most states. Avoid heavy monsoon months (June–September) as landslides are common.</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="local.jpg" alt="Etiquette">
+        <div class="card-content">
+          <h3>Local Etiquette</h3>
+          <p>Respect local traditions. Always ask before photographing people. Modest dressing is appreciated in villages and monasteries.</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="travel.jpg" alt="Safety">
+        <div class="card-content">
+          <h3>Travel Safety</h3>
+          <p>Stick to group travel for remote treks. Always carry cash as ATMs are limited in rural areas. Keep permits ready for border states.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Back Button -->
+    <div class="back-button">
+      <button onclick="window.location.href='frontsheet.html'">⬅ Back to Home</button>
+    </div>
+  </div>
+</body>
+</html>
+
+  <footer>
+    <p>© 2025 Discover North-East India | Designed for exploration ✈️</p>
+  </footer>
+
+</body>
+</html>

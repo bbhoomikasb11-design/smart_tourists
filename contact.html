@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - Tourist Safety Portal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #222;
+
+  /* Background image */
+  background: url('back.jpg') no-repeat center center fixed;
+  background-size: cover; /* Perfect fit */
+
+  /* Use a semi-transparent overlay */
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 64, 128, 0.6); /* Blue overlay with transparency */
+  z-index: -1; /* Keeps it behind the content */
+}
+
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #004080;
+      padding: 15px 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar h1 {
+        color: #fff;
+      font-size: 1.8em;
+      margin: 0;
+    }
+
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar ul li {
+      margin-left: 25px;
+    }
+
+    .navbar ul li a {
+      text-decoration: none;
+      color: #fff;
+      font-size: 1.1em;
+      transition: color 0.3s ease-in-out;
+    }
+
+    .navbar ul li a:hover {
+      color: #1ec5ff;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #0073e6, #003366);
+      color: white;
+      text-align: center;
+      padding: 80px 20px;
+      animation: fadeIn 2s ease-in;
+    }
+
+    .hero h2 {
+      font-size: 2.8em;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 1.2em;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    /* Contact Section */
+    .contact-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 60px 40px;
+      background: #e6f2ff;
+    }
+
+    .contact-info, .contact-form {
+      flex: 1;
+      min-width: 300px;
+      margin: 20px;
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+      animation: fadeInUp 1.5s ease;
+    }
+
+    .contact-info h3, .contact-form h3 {
+      color: #004080;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .contact-info p {
+      font-size: 1.1em;
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+
+    /* Form */
+    .contact-form form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contact-form label {
+      text-align: left;
+      margin: 10px 0 5px;
+      font-weight: bold;
+      color: #003366;
+    }
+
+    .contact-form input, .contact-form textarea {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1em;
+      transition: border 0.3s ease;
+    }
+
+    .contact-form input:focus, .contact-form textarea:focus {
+      border: 1px solid #0073e6;
+      outline: none;
+    }
+
+    .contact-form button {
+      margin-top: 20px;
+      padding: 14px;
+      background: #004080;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    .contact-form button:hover {
+      background: #1ec5ff;
+      transform: translateY(-3px);
+    }
+
+    /* Footer */
+    .footer {
+      background: #00264d;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+      font-size: 0.9em;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <div class="navbar">
+    <h1>SATRANGI</h1>
+    <ul>
+      <li><a href="frontsheet.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h2>Contact Us</h2>
+    <p>We’re here to help you with your journey. Reach out to us anytime for support, feedback, or emergencies.</p>
+  </div>
+
+  <!-- Contact Section -->
+  <div class="contact-section">
+    <!-- Contact Info -->
+    <div class="contact-info">
+      <h3>Get in Touch</h3>
+      <p><strong>📍 Address:</strong> Tourist Safety HQ, New Delhi, India</p>
+      <p><strong>📞 Phone:</strong> +91 98765 43210</p>
+      <p><strong>📧 Email:</strong> satrangi@touristsafety.in</p>
+      <p>Our team is available 24/7 to ensure your travel safety and answer your queries.</p>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="contact-form">
+      <h3>Send Us a Message</h3>
+      <form>
+        <label for="name">Your Name</label>
+        <input type="text" id="name" placeholder="Enter your name" required>
+
+        <label for="email">Your Email</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+
+        <label for="message">Message</label>
+        <textarea id="message" rows="5" placeholder="Write your message..." required></textarea>
+
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; 2025 Smart Tourist Safety Portal | Designed with care for safe travels
+  </div>
+
+</body>
+</html>

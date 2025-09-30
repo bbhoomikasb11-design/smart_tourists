@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tourist Profile - Smart Tourist Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #003366, #0073e6);
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      overflow: hidden;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0073e6, #005bb5);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 2.5em;
+      margin: 0 0 10px 0;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+      margin: 0;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .form-section {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      color: #003366;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e6f2ff;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      color: #003366;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border: 1px solid #0073e6;
+      box-shadow: 0 0 8px rgba(0, 115, 230, 0.4);
+    }
+
+    .form-group textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #0073e6, #005bb5);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.2em;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 115, 230, 0.4);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .back-btn {
+      width: 100%;
+      padding: 14px;
+      background: #e6f2ff;
+      border: none;
+      border-radius: 12px;
+      color: #003366;
+      font-size: 1.05em;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: #cce0ff;
+      transform: translateY(-3px);
+    }
+
+    /* Loading and message styles */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .blockchain-info {
+      background: #e8f4fd;
+      border: 1px solid #b8daff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .blockchain-id {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #0066cc;
+      background: #f0f8ff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      display: inline-block;
+      margin: 10px 0;
+      font-size: 1.1em;
+    }
+
+    .profile-complete {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .profile-complete h3 {
+      color: #155724;
+      margin: 0 0 10px 0;
+    }
+
+    .profile-complete p {
+      color: #155724;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .content {
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Complete Your Tourist Profile</h1>
+      <p>Help us personalize your North-East India experience</p>
+    </div>
+
+    <div class="content">
+      <div id="messageContainer"></div>
+      <button type="button" onclick="document.getElementById('messageContainer').innerHTML=''" style="background: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9em; cursor: pointer; margin-bottom: 10px; display: none;" id="clearMessagesBtn">Clear Messages</button>
+
+      <form id="touristForm">
+        <!-- Personal Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">Personal Information</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="fullName">Full Name *</label>
+              <input type="text" id="fullName" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+              <label for="age">Age *</label>
+              <input type="number" id="age" placeholder="Your age" min="18" max="100" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number *</label>
+              <input type="tel" id="phone" placeholder="+91 9876543210" required>
+            </div>
+            <div class="form-group">
+              <label for="nationality">Nationality *</label>
+              <select id="nationality" required>
+                <option value="">Select Nationality</option>
+                <option value="Indian">Indian</option>
+                <option value="Foreign">Foreign</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label for="address">Home Address *</label>
+              <textarea id="address" placeholder="Enter your complete address" required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Travel Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">Travel Information</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="arrivalDate">Arrival Date *</label>
+              <input type="date" id="arrivalDate" required>
+            </div>
+            <div class="form-group">
+              <label for="departureDate">Departure Date *</label>
+              <input type="date" id="departureDate" required>
+            </div>
+            <div class="form-group">
+              <label for="travelGroup">Travel Group Size *</label>
+              <select id="travelGroup" required>
+                <option value="">Select Group Size</option>
+                <option value="1">Solo (1 person)</option>
+                <option value="2">Couple (2 people)</option>
+                <option value="3-5">Small Group (3-5 people)</option>
+                <option value="6-10">Medium Group (6-10 people)</option>
+                <option value="10+">Large Group (10+ people)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="budget">Budget Range *</label>
+              <select id="budget" required>
+                <option value="">Select Budget</option>
+                <option value="budget">Budget (₹5,000-15,000)</option>
+                <option value="mid-range">Mid-range (₹15,000-30,000)</option>
+                <option value="luxury">Luxury (₹30,000+)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accommodation Section -->
+        <div class="form-section">
+          <h2 class="section-title">Accommodation Preferences</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="accommodationType">Accommodation Type *</label>
+              <select id="accommodationType" required>
+                <option value="">Select Type</option>
+                <option value="hotel">Hotel</option>
+                <option value="homestay">Homestay</option>
+                <option value="resort">Resort</option>
+                <option value="hostel">Hostel</option>
+                <option value="camping">Camping</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="preferredLocation">Preferred Location *</label>
+              <select id="preferredLocation" required>
+                <option value="">Select Location</option>
+                <option value="assam">Assam (Guwahati, Kaziranga)</option>
+                <option value="meghalaya">Meghalaya (Shillong, Cherrapunji)</option>
+                <option value="sikkim">Sikkim (Gangtok, Pelling)</option>
+                <option value="arunachal">Arunachal Pradesh (Tawang, Itanagar)</option>
+                <option value="nagaland">Nagaland (Kohima, Dimapur)</option>
+                <option value="manipur">Manipur (Imphal, Loktak)</option>
+                <option value="mizoram">Mizoram (Aizawl, Lunglei)</option>
+                <option value="tripura">Tripura (Agartala, Ujjayanta)</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label for="specialRequirements">Special Requirements</label>
+              <textarea id="specialRequirements" placeholder="Any dietary restrictions, accessibility needs, or special requests"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interests Section -->
+        <div class="form-section">
+          <h2 class="section-title">Interests & Activities</h2>
+          <div class="form-group">
+            <label>Select your interests (choose all that apply):</label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="nature" style="margin-right: 8px;">
+                Nature & Wildlife
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="culture" style="margin-right: 8px;">
+                Culture & Heritage
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="adventure" style="margin-right: 8px;">
+                Adventure Sports
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="photography" style="margin-right: 8px;">
+                Photography
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="trekking" style="margin-right: 8px;">
+                Trekking & Hiking
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="food" style="margin-right: 8px;">
+                Local Cuisine
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="festivals" style="margin-right: 8px;">
+                Festivals & Events
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal;">
+                <input type="checkbox" name="interests" value="spiritual" style="margin-right: 8px;">
+                Spiritual & Religious
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Complete Profile & Generate Blockchain ID</button>
+        <button type="button" class="back-btn" onclick="window.location.href='frontsheet.html'">← Back to Home</button>
+        <button type="button" class="back-btn" id="loginBtn" onclick="window.location.href='login.html'" style="background: #28a745; color: white; margin-top: 10px;">🔐 Login to Continue</button>
+        <button type="button" class="back-btn" onclick="window.location.href='register.html'" style="background: #17a2b8; color: white; margin-top: 10px;">📝 Register New Account</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Backend API configuration
+    const API_BASE = 'http://localhost:3000/api';
+    
+    // DOM elements
+    const form = document.getElementById('touristForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const messageContainer = document.getElementById('messageContainer');
+    const container = document.querySelector('.container');
+
+    // Check if user is logged in
+    window.addEventListener('load', () => {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      if (isLoggedIn !== 'true' || !user.id) {
+        showMessage('Please login first to access this page. Click the login button below.', 'error');
+        // Hide form and show login button
+        form.style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'block';
+        return;
+      }
+
+      // Hide login button if user is logged in
+      document.getElementById('loginBtn').style.display = 'none';
+      
+      // Check if profile already exists
+      if (user.blockchainId) {
+        checkExistingProfile(user.blockchainId);
+      }
+    });
+
+    // Show message function
+    function showMessage(message, type = 'error') {
+      messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+      // Show clear button when there's a message
+      document.getElementById('clearMessagesBtn').style.display = 'inline-block';
+      // No auto-hide, let user read the message
+    }
+
+    // Show loading state
+    function setLoading(loading) {
+      if (loading) {
+        container.classList.add('loading');
+        submitBtn.textContent = 'Processing...';
+        submitBtn.disabled = true;
+      } else {
+        container.classList.remove('loading');
+        submitBtn.textContent = 'Complete Profile & Generate Blockchain ID';
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Check if profile already exists
+    async function checkExistingProfile(blockchainId) {
+      try {
+        const response = await fetch(`${API_BASE}/user/${blockchainId}`);
+        const data = await response.json();
+        
+        if (data.success && data.user.profile_completed) {
+          showMessage('Profile already completed! You can continue to the main page.', 'success');
+          
+          // Show continue button for completed profiles
+          messageContainer.innerHTML += `
+            <div style="text-align: center; margin-top: 20px;">
+              <button onclick="window.location.href='frontsheet.html'" style="background: #0073e6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Continue to Main Page →
+              </button>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.log('Profile check failed:', error);
+      }
+    }
+
+    // Get selected interests
+    function getSelectedInterests() {
+      const checkboxes = document.querySelectorAll('input[name="interests"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // Validate form
+    function validateForm() {
+      const requiredFields = [
+        'fullName', 'age', 'phone', 'nationality', 'address',
+        'arrivalDate', 'departureDate', 'travelGroup', 'budget',
+        'accommodationType', 'preferredLocation'
+      ];
+
+      for (const field of requiredFields) {
+        const element = document.getElementById(field);
+        if (!element.value.trim()) {
+          showMessage(`Please fill in ${element.previousElementSibling.textContent.replace('*', '').trim()}`);
+          element.focus();
+          return false;
+        }
+      }
+
+      // Validate dates
+      const arrivalDate = new Date(document.getElementById('arrivalDate').value);
+      const departureDate = new Date(document.getElementById('departureDate').value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (arrivalDate < today) {
+        showMessage('Arrival date cannot be in the past');
+        return false;
+      }
+
+      if (departureDate <= arrivalDate) {
+        showMessage('Departure date must be after arrival date');
+        return false;
+      }
+
+      return true;
+    }
+
+    // Submit form
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      if (!validateForm()) {
+        return;
+      }
+
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const interests = getSelectedInterests();
+
+      const profileData = {
+        userId: user.id,
+        personalInfo: {
+          fullName: document.getElementById('fullName').value.trim(),
+          age: parseInt(document.getElementById('age').value),
+          phone: document.getElementById('phone').value.trim(),
+          nationality: document.getElementById('nationality').value,
+          address: document.getElementById('address').value.trim()
+        },
+        travelInfo: {
+          arrivalDate: document.getElementById('arrivalDate').value,
+          departureDate: document.getElementById('departureDate').value,
+          travelGroup: document.getElementById('travelGroup').value,
+          budget: document.getElementById('budget').value
+        },
+        accommodation: {
+          type: document.getElementById('accommodationType').value,
+          location: document.getElementById('preferredLocation').value,
+          specialRequirements: document.getElementById('specialRequirements').value.trim()
+        },
+        interests: interests,
+        completedAt: new Date().toISOString()
+      };
+
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${API_BASE}/profile`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(profileData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Update user data with new blockchain ID
+          const updatedUser = { ...user, blockchainId: data.blockchainId };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          // Show success message with blockchain ID
+          messageContainer.innerHTML = `
+            <div class="profile-complete">
+              <h3>🎉 Profile Completed Successfully!</h3>
+              <p>Your tourist profile has been encrypted and stored securely.</p>
+              <div class="blockchain-info">
+                <strong>Your Secure Blockchain ID:</strong><br>
+                <span class="blockchain-id">${data.blockchainId}</span><br>
+                <small>This ID is your secure identifier in our system</small>
+                <br><br>
+                <button onclick="window.location.href='frontsheet.html'" style="background: #0073e6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+                  Continue to Main Page →
+                </button>
+              </div>
+            </div>
+          `;
+
+          // Hide form and show completion
+          form.style.display = 'none';
+          
+          // Don't auto-redirect, let user choose when to continue
+        } else {
+          showMessage(data.message || 'Failed to save profile. Please try again.');
+        }
+      } catch (error) {
+        console.error('Profile submission error:', error);
+        showMessage('Connection error. Please make sure the server is running on localhost:3000');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Event listeners
+    form.addEventListener('submit', handleSubmit);
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('arrivalDate').setAttribute('min', today);
+    document.getElementById('departureDate').setAttribute('min', today);
+
+    // Update departure date minimum when arrival date changes
+    document.getElementById('arrivalDate').addEventListener('change', function() {
+      const arrivalDate = this.value;
+      document.getElementById('departureDate').setAttribute('min', arrivalDate);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SATRANGI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --nav-height:72px;
+      --max-width:1200px;
+      --glass: rgba(255,255,255,0.06);
+    }
+    *{box-sizing:border-box}
+    body,html{height:100%;margin:0;font-family:Montserrat,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial}
+
+    /* Page layout */
+    .page{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg,#0b6ba5 0%, #063f5e 100%);
+      padding:40px 20px;
+    }
+
+    .card{
+      width:100%;
+      max-width:var(--max-width);
+      height:560px;
+      position:relative;
+      overflow:hidden;
+      border-radius:14px;
+      box-shadow:0 20px 50px rgba(2,10,20,0.6);
+      background:#000;
+    }
+
+    /* Background image */
+    .hero-bg{
+      position:absolute;inset:0;background-image:url('sikkim.jpg');
+      background-size:cover;background-position:center;filter:contrast(1.02) saturate(1.05);
+      transform:scale(1.03);
+    }
+
+    /* soft gradient & blur vignette */
+    .overlay{
+      position:absolute;inset:0;background:linear-gradient(180deg, rgba(3,37,64,0.25) 10%, rgba(3,37,64,0.55) 60%);
+      mix-blend-mode:multiply;
+    }
+
+    /* top navigation */
+    .nav{
+      position:absolute;left:0;right:0;top:0;height:var(--nav-height);display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+      z-index:6;
+      backdrop-filter: blur(6px);
+    }
+    .nav .brand{color:white;font-weight:800;letter-spacing:2px}
+    .nav .menu{display:flex;gap:22px;align-items:center}
+    .nav a{color:rgba(255,255,255,0.92);text-decoration:none;font-weight:600;font-size:14px;transition:0.3s}
+    .nav a:hover{color:#fff}
+
+    /* hero content */
+    .content{
+      position:absolute;left:60px;top:60px;bottom:60px;right:60px;z-index:5;display:flex;flex-direction:column;justify-content:center;
+    }
+
+    .eyebrow{color:rgba(255,255,255,0.85);font-weight:600;margin-bottom:6px}
+
+    .title{
+      display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;line-height:0.88;margin:0 0 18px 0;
+    }
+    .title h1{margin:0;color:white;font-weight:800;font-size:clamp(40px,7vw,86px);letter-spacing:-1px;line-height:0.9}
+    .title .outline{
+      -webkit-text-stroke:2px rgba(255,255,255,0.18);
+      color:transparent;font-weight:800;font-size:clamp(40px,7vw,86px);}
+
+    .lead{color:rgba(255,255,255,0.9);max-width:680px;font-size:16px;font-weight:300;margin-bottom:26px}
+
+    /* info row at bottom of hero */
+    .info-row{
+      display:flex;gap:28px;color:rgba(255,255,255,0.95);font-size:14px;margin-top:16px;border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;max-width:900px
+    }
+    .info{
+      display:flex;flex-direction:column;gap:6px
+    }
+    .info .label{font-size:12px;color:rgba(255,255,255,0.6)}
+    .info .value{font-weight:700}
+
+    /* responsive adjustments */
+    @media (max-width:900px){
+      .card{height:640px}
+      .content{left:28px;right:28px;top:80px}
+      .nav{padding:0 18px}
+      .info-row{flex-direction:column;gap:12px}
+      .title h1,.title .outline{font-size:clamp(34px,9vw,56px)}
+    }
+    @media (max-width:480px){
+      .card{height:720px;border-radius:10px}
+      .title h1,.title .outline{font-size:36px}
+      .lead{font-size:15px}
+      .nav .menu{display:none}
+    }
+    /* Chatbot widget */
+    .chat-toggle{
+      position:fixed;right:22px;bottom:22px;z-index:20;border:none;border-radius:999px;
+      height:54px;width:54px;background:#15a4ff;color:#00263b;cursor:pointer;font-weight:800;
+      box-shadow:0 10px 30px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;
+      transition:transform .15s ease, background .2s ease
+    }
+    .chat-toggle:hover{transform:translateY(-2px);background:#1bb3ff}
+    .chat-widget{
+      position:fixed;right:22px;bottom:86px;width:320px;max-width:92vw;background:rgba(2,24,38,0.96);
+      color:#e9f5ff;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;z-index:20;
+      box-shadow:0 20px 50px rgba(0,0,0,0.45);backdrop-filter: blur(6px);display:none
+    }
+    .chat-widget.open{display:flex;flex-direction:column}
+    .chat-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(21,164,255,0.1);border-bottom:1px solid rgba(255,255,255,0.06)}
+    .chat-header .title{display:flex;align-items:center;gap:8px}
+    .chat-header .title span{font-weight:700;letter-spacing:.3px}
+    .chat-close{background:transparent;border:none;color:#e9f5ff;cursor:pointer}
+    .chat-body{padding:12px;display:flex;flex-direction:column;gap:10px;max-height:280px;overflow:auto}
+    .msg{display:flex;gap:8px;align-items:flex-end}
+    .msg.bot{justify-content:flex-start}
+    .msg.user{justify-content:flex-end}
+    .bubble{max-width:80%;padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.35}
+    .bot .bubble{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08)}
+    .user .bubble{background:#15a4ff;color:#00263b;font-weight:700}
+    .chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.25)}
+    .chat-input input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#e9f5ff}
+    .chat-input button{padding:10px 12px;border-radius:10px;border:none;background:#15a4ff;color:#00263b;font-weight:800;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card" role="region" aria-label="Hero preview">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="overlay" aria-hidden="true"></div>
+
+      <header class="nav">
+        <div class="brand">SATRANGI</div>
+        <nav class="menu" aria-label="Main navigation">
+          <a href="explore.html">Explore</a>
+          <a href="discover.html">Discover</a>
+                              <a href="about.html">About Us</a>
+
+          <a href="login.html">Tourists Login</a>
+
+        </nav>
+        <div style="display:flex;gap:12px;align-items:center;color:rgba(255,255,255,0.9)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2v20" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </header>
+
+      <main class="content">
+        <p class="eyebrow">Explore North-East India — the gateway to the Himalayas and beyond</p>
+        <div class="title">
+          <h1>SEVEN SISTERS</h1>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="outline">AND THE,</div>
+          </div>
+          <h1>BROTHER</h1>
+        </div>
+
+        <p class="lead">Ensuring safe and smart exploration across the vibrant North-East of India.</p>
+
+        <div class="info-row" role="list">
+          <div class="info" role="listitem">
+            <div class="label">Most popular activity</div>
+            <div class="value">Exploring Living Root Bridges in Meghalaya</div>
+          </div>
+
+          <div class="info" role="listitem">
+            <div class="label">Most excited place</div>
+            <div class="value">Shillong — Scotland of the East</div>
+          </div>
+
+          <div class="info" role="listitem">
+            <div class="label">Culture style</div>
+            <div class="value">Tribal Harmony</div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+  <button id="chatToggle" class="chat-toggle" aria-label="Open chat" title="Chat with us">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm-2 10H6V10h12v2zm0-3H6V7h12v2zm-5 6H6v-2h7v2z"/></svg>
+  </button>
+
+  <section id="chatWidget" class="chat-widget" role="dialog" aria-label="Assistant chat" aria-modal="false">
+    <header class="chat-header">
+      <div class="title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#15a4ff" aria-hidden="true"><path d="M12 2a10 10 0 00-9.95 9.05A7 7 0 007 22h7a8 8 0 008-8V9a7 7 0 00-7-7z"/></svg>
+        <span>Satrangi Guide</span>
+      </div>
+      <button class="chat-close" id="chatClose" aria-label="Close chat">✕</button>
+    </header>
+    <div class="chat-body" id="chatBody" tabindex="0" aria-live="polite"></div>
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Ask about places, login, explore..." aria-label="Type your message" />
+      <button id="chatSend" aria-label="Send message">Send</button>
+    </div>
+  </section>
+
+  <script>
+    (function(){
+      const toggle = document.getElementById('chatToggle');
+      const widget = document.getElementById('chatWidget');
+      const closeBtn = document.getElementById('chatClose');
+      const body = document.getElementById('chatBody');
+      const input = document.getElementById('chatInput');
+      const send = document.getElementById('chatSend');
+
+      function openChat(){
+        widget.classList.add('open');
+        toggle.setAttribute('aria-label','Close chat');
+        input.focus();
+        if (!body.dataset.greeted){
+          addBot("Hi! I'm your Satrangi guide. Try asking: 'best places', 'Meghalaya', 'login', 'explore', or 'help'.");
+          body.dataset.greeted = '1';
+        }
+      }
+      function closeChat(){
+        widget.classList.remove('open');
+        toggle.setAttribute('aria-label','Open chat');
+      }
+      function addMessage(text, who){
+        const row = document.createElement('div');
+        row.className = 'msg ' + who;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = text;
+        row.appendChild(bubble);
+        body.appendChild(row);
+        body.scrollTop = body.scrollHeight;
+      }
+      function addBot(text){ addMessage(text,'bot'); }
+      function addUser(text){ addMessage(text,'user'); }
+
+      function replyTo(text){
+        const q = text.toLowerCase().trim();
+        if (!q) return;
+        // intents
+        if (/(hi|hello|hey)\b/.test(q)) return addBot('Hello! How can I help with your North-East trip?');
+        if (/help|what can you do/.test(q)) return addBot("I can suggest places, routes to pages (Explore, Discover, Login), and quick facts.");
+        if (/login/.test(q)) return addBot('Click here to go to Login page: <a href="login.html" style="color: #15a4ff; text-decoration: underline;">Login Page</a>');
+        if (/explore/.test(q)) return addBot('Click here to go to Explore: <a href="explore.html" style="color: #15a4ff; text-decoration: underline;">Explore Page</a>');
+        if (/discover/.test(q)) return addBot('Click here to go to Discover: <a href="discover.html" style="color: #15a4ff; text-decoration: underline;">Discover Page</a>');
+        if (/about/.test(q)) return addBot('Click here to learn more about us: <a href="about.html" style="color: #15a4ff; text-decoration: underline;">About Us</a>');
+
+        if (/meghalaya|root bridge|shillong/.test(q)) return addBot('Must-see: Living Root Bridges, Mawlynnong, and Shillong cafés. Best months: Oct–Apr.');
+        if (/assam|kaziranga|guwahati/.test(q)) return addBot('Assam: Kaziranga for one-horned rhinos, Majuli island, and river cruises on Brahmaputra.');
+        if (/sikkim|gangtok|nathula/.test(q)) return addBot('Sikkim: Gangtok, Tsomgo Lake, Nathula Pass. Carry permits and check weather.');
+        if (/arunachal|tawang|ziro/.test(q)) return addBot('Arunachal: Tawang Monastery, Ziro Valley, and Dirang. Permits required.');
+        if (/nagaland|kohima|hornbill/.test(q)) return addBot('Nagaland: Kohima and the Hornbill Festival (Dec).');
+        if (/manipur|loktak|imphal/.test(q)) return addBot('Manipur: Loktak Lake with phumdis, Kangla Fort, Ima Keithel market.');
+        if (/mizoram|aizawl/.test(q)) return addBot('Mizoram: Aizawl viewpoints, Durtlang Hills, Vantawng Falls.');
+        if (/tripura|agartala|ujjayanta|neermahal/.test(q)) return addBot('Tripura: Ujjayanta Palace (Agartala), Neermahal Water Palace, Unakoti rock reliefs.');
+
+        if (/best places|suggest|itinerary|where to go/.test(q)) return addBot('Quick picks: Shillong, Cherrapunji, Kaziranga, Gangtok, Tawang. Want details?');
+
+        return addBot("I didn't get that. Try 'explore', 'login', or ask about a state like 'Meghalaya'.");
+      }
+
+      function handleSend(){
+        const text = input.value;
+        if (!text.trim()) return;
+        addUser(text);
+        input.value='';
+        setTimeout(()=>replyTo(text), 200);
+      }
+
+      toggle.addEventListener('click', ()=>{
+        if (widget.classList.contains('open')){ closeChat(); } else { openChat(); }
+      });
+      closeBtn.addEventListener('click', closeChat);
+      send.addEventListener('click', handleSend);
+      input.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); handleSend(); }});
+
+      // keyboard access to toggle
+      toggle.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle.click(); }});
+    })();
+  </script>
+</body>
+</html>

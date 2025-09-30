@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Smart Tourist Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      height: 100vh;
+      background: linear-gradient(135deg, #003366, #0073e6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      display: flex;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      overflow: hidden;
+      width: 950px;
+      max-width: 95%;
+      height: auto;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .left {
+      flex: 1;
+      background: #e6f2ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+    .left img { max-width: 100%; height: auto; }
+    .right {
+      flex: 1;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 50px;
+    }
+    .right h2 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      color: #003366;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    .form-group { width: 100%; margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      color: #003366;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.3s ease;
+    }
+    .form-group input:focus {
+      outline: none;
+      border: 1px solid #0073e6;
+      box-shadow: 0 0 8px rgba(0, 115, 230, 0.4);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #0073e6, #005bb5);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1em;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .login-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 115, 230, 0.4);
+    }
+    .back-btn {
+      width: 100%;
+      padding: 14px;
+      background: #e6f2ff;
+      border: none;
+      border-radius: 12px;
+      color: #003366;
+      font-size: 1.05em;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .back-btn:hover {
+      background: #cce0ff;
+      transform: translateY(-3px);
+    }
+
+    /* Loading and message styles */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .blockchain-info {
+      background: #e8f4fd;
+      border: 1px solid #b8daff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 0.9em;
+    }
+
+    .blockchain-id {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #0066cc;
+      background: #f0f8ff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <img src="trees.jpg" alt="Register Illustration">
+    </div>
+    <div class="right">
+      <h2>Create Account</h2>
+      
+      <div id="messageContainer"></div>
+      <button type="button" onclick="document.getElementById('messageContainer').innerHTML=''; this.style.display='none'" style="background: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9em; cursor: pointer; margin-bottom: 10px; display: none;" id="clearMessagesBtn">Clear Messages</button>
+      
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Choose a username" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm">Confirm Password</label>
+        <input type="password" id="confirm" placeholder="Confirm your password" required>
+      </div>
+      <button class="login-btn" id="registerBtn">Register</button>
+      <button class="back-btn" onclick="window.location.href='login.html'">← Back to Login</button>
+    </div>
+  </div>
+
+  <script>
+    // Backend API configuration
+    const API_BASE = 'http://localhost:3000/api';
+    
+    // DOM elements
+    const registerBtn = document.getElementById('registerBtn');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirm');
+    const messageContainer = document.getElementById('messageContainer');
+    const container = document.querySelector('.container');
+
+    // Show message function
+    function showMessage(message, type = 'error') {
+      messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+      // Show clear button when there's a message
+      document.getElementById('clearMessagesBtn').style.display = 'inline-block';
+      // No auto-hide, let user read the message
+    }
+
+    // Show loading state
+    function setLoading(loading) {
+      if (loading) {
+        container.classList.add('loading');
+        registerBtn.textContent = 'Creating Account...';
+        registerBtn.disabled = true;
+      } else {
+        container.classList.remove('loading');
+        registerBtn.textContent = 'Register';
+        registerBtn.disabled = false;
+      }
+    }
+
+    // Register function
+    async function handleRegister() {
+      const username = usernameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      const confirm = confirmInput.value.trim();
+
+      if (!username || !email || !password || !confirm) {
+        showMessage('Please fill in all fields');
+        return;
+      }
+
+      if (password !== confirm) {
+        showMessage('Passwords do not match');
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage('Password must be at least 6 characters long');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage(`Registration successful! Please complete your profile to get your blockchain ID.`, 'success');
+          
+          // Show continue button
+          messageContainer.innerHTML += `
+            <div class="blockchain-info">
+              <strong>Account Created Successfully!</strong><br>
+              <small>Complete your profile to get your unique blockchain ID</small>
+              <br><br>
+              <button onclick="window.location.href='after-login.html'" style="background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+                Continue to Profile Setup →
+              </button>
+            </div>
+          `;
+          
+          // Clear form
+          usernameInput.value = '';
+          emailInput.value = '';
+          passwordInput.value = '';
+          confirmInput.value = '';
+        } else {
+          showMessage(data.message || 'Registration failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showMessage('Connection error. Please make sure the server is running on localhost:3000');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Event listeners
+    registerBtn.addEventListener('click', handleRegister);
+    
+    // Enter key support
+    confirmInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleRegister();
+      }
+    });
+
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        confirmInput.focus();
+      }
+    });
+
+    emailInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        passwordInput.focus();
+      }
+    });
+
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        emailInput.focus();
+      }
+    });
+  </script>
+
+</body>
+</html>

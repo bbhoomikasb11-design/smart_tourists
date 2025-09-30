@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password - Smart Tourist Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      height: 100vh;
+      background: linear-gradient(135deg, #003366, #0073e6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      display: flex;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      overflow: hidden;
+      width: 900px;
+      max-width: 95%;
+      height: 500px;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .left {
+      flex: 1;
+      background: #e6f2ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+    .left img { max-width: 100%; height: auto; }
+    .right {
+      flex: 1;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 50px;
+    }
+    .right h2 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      color: #003366;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    .desc {
+      text-align: center;
+      font-size: 0.95em;
+      margin-bottom: 20px;
+      color: #444;
+    }
+    .form-group { width: 100%; margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      color: #003366;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.3s ease;
+    }
+    .form-group input:focus {
+      outline: none;
+      border: 1px solid #0073e6;
+      box-shadow: 0 0 8px rgba(0, 115, 230, 0.4);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #0073e6, #005bb5);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1em;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .login-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 115, 230, 0.4);
+    }
+    .back-btn {
+      width: 100%;
+      padding: 14px;
+      background: #e6f2ff;
+      border: none;
+      border-radius: 12px;
+      color: #003366;
+      font-size: 1.05em;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .back-btn:hover {
+      background: #cce0ff;
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <img src="f.jpg" alt="Forgot Password Illustration">
+    </div>
+    <div class="right">
+      <h2>Forgot Password?</h2>
+      <p class="desc">Enter your registered email and we’ll send you reset instructions.</p>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+      </div>
+      <button class="login-btn">Send Reset Link</button>
+      <button class="back-btn" onclick="window.location.href='login.html'">← Back to Login</button>
+    </div>
+  </div>
+</body>
+</html>

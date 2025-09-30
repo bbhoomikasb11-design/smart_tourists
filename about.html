@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - Tourist Safety Portal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5faff;
+      color: #222;
+      /* Background image */
+  background: url('back.jpg') no-repeat center center fixed;
+  background-size: cover; /* Perfect fit */
+
+  /* Use a semi-transparent overlay */
+  position: relative;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #004080;
+      padding: 15px 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar h1 {
+      color: #fff;
+      font-size: 1.8em;
+      margin: 0;
+    }
+
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar ul li {
+      margin-left: 25px;
+    }
+
+    .navbar ul li a {
+      text-decoration: none;
+      color: #fff;
+      font-size: 1.1em;
+      transition: color 0.3s ease-in-out;
+    }
+
+    .navbar ul li a:hover {
+      color: #1ec5ff;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #0073e6, #003366);
+      color: white;
+      text-align: center;
+      padding: 80px 20px;
+      animation: fadeIn 2s ease-in;
+    }
+
+    .hero h2 {
+      font-size: 2.8em;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 1.2em;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    /* Content Sections */
+    .section {
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .section h3 {
+      color: #004080;
+      font-size: 2em;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .section h3::after {
+      content: "";
+      width: 60px;
+      height: 4px;
+      background: #1ec5ff;
+      display: block;
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    .section p {
+      max-width: 900px;
+      margin: auto;
+      font-size: 1.1em;
+      line-height: 1.7;
+      color: #444;
+    }
+
+    /* Cards */
+    .features {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .card {
+      background: #e6f2ff;
+      margin: 15px;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+      width: 280px;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h4 {
+      color: #003366;
+      margin-bottom: 15px;
+    }
+
+    /* Footer */
+    .footer {
+      background: #00264d;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+      font-size: 0.9em;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <div class="navbar">
+    <h1>SATRANGI</h1>
+    <ul>
+      <li><a href="frontsheet.html">Home</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h2>About Our Portal</h2>
+    <p>
+      The Smart Tourist Safety Monitoring & Incident Response System ensures every traveler’s journey 
+      is safe, secure, and enjoyable. Learn how to log in, explore key features, and discover how this 
+      platform benefits tourists like you.
+    </p>
+  </div>
+
+  <!-- Login Process -->
+  <div class="section">
+    <h3>How Tourists Can Log In</h3>
+    <p>
+      Tourists can create a secure digital identity using blockchain-based login. After registration, 
+      they receive a unique ID which ensures privacy and tamper-proof access to our services. 
+      With just a few clicks, tourists can log in from anywhere and start their safe journey.
+    </p>
+  </div>
+
+  <!-- Benefits -->
+  <div class="section" style="background:#f0f8ff;">
+    <h3>How Tourists Benefit</h3>
+    <p>
+      Our portal provides real-time safety alerts, incident reporting, and quick response systems. 
+      Tourists can travel with peace of mind, knowing they are monitored through AI-driven technology 
+      and protected by secure digital identities. Geo-fencing ensures they are always aware of safe and 
+      restricted zones during their travels.
+    </p>
+  </div>
+
+  <!-- Key Features -->
+  <div class="section">
+    <h3>Key Features</h3>
+    <div class="features">
+      <div class="card">
+        <h4>AI-Powered Safety</h4>
+        <p>Real-time incident detection and intelligent alerts ensure a safe travel experience.</p>
+      </div>
+      <div class="card">
+        <h4>Geo-Fencing</h4>
+        <p>Defines safe and restricted zones, warning tourists instantly upon entry or exit.</p>
+      </div>
+      <div class="card">
+        <h4>Blockchain Identity</h4>
+        <p>Provides tourists with tamper-proof digital IDs for secure and seamless logins.</p>
+      </div>
+      <div class="card">
+        <h4>Instant Response</h4>
+        <p>Quickly connects tourists with emergency services during unexpected incidents.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; 2025 Smart Tourist Safety Portal | Designed with care for safe travels
+  </div>
+
+</body>
+</html>

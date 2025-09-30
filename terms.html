@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Conditions - Smart Tourist Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      background: url('terms-bg.jpg') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 51, 102, 0.7);
+      z-index: 0;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      width: 90%;
+      max-width: 1000px;
+      padding: 40px;
+      animation: fadeIn 1s ease-in-out;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      color: #003366;
+      font-size: 2.2em;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    ul li {
+      margin-bottom: 18px;
+      font-size: 1.05em;
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      color: #333;
+    }
+    ul li::before {
+      content: "✔";
+      color: #0073e6;
+      font-weight: bold;
+      margin-right: 12px;
+      font-size: 1.2em;
+    }
+    .back-btn {
+      display: block;
+      margin: 25px auto 0;
+      padding: 14px 30px;
+      background: linear-gradient(135deg, #0073e6, #005bb5);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.05em;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .back-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 115, 230, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="container">
+    <h2>Terms & Conditions</h2>
+    <ul>
+      <li>By registering on the Smart Tourist Portal, you agree to provide accurate and updated information at all times.</li>
+      <li>All users must maintain the confidentiality of their login credentials. The portal is not responsible for unauthorized access caused by negligence.</li>
+      <li>The system uses geo-fencing and real-time monitoring. By using the platform, you consent to location-based services for safety purposes.</li>
+      <li>Any misuse of the SOS feature or emergency alerts may result in account suspension or legal consequences.</li>
+      <li>Data collected (such as identity details, travel records, and emergency logs) will be stored securely and used only for safety monitoring and official purposes.</li>
+      <li>The portal integrates with law enforcement and emergency services; users must cooperate during incidents or investigations.</li>
+      <li>Blockchain-based digital IDs are tamper-proof and unique. Sharing or forging IDs is strictly prohibited.</li>
+      <li>The platform is designed for tourist safety. Any unauthorized commercial use is not permitted without prior approval.</li>
+      <li>We may update these terms periodically. Continued use of the system after changes indicates acceptance of the updated policies.</li>
+      <li>In case of disputes, jurisdiction lies with the respective governing authority as per the laws applicable in the deployment region.</li>
+    </ul>
+    <button class="back-btn" onclick="window.location.href='register.html'">← Back</button>
+  </div>
+</body>
+</html>
