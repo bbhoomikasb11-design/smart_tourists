@@ -34,7 +34,7 @@ By combining **safety, technology, and trust**, this project transforms how tour
 
 ##  Contributors
 
-* [Your Team/Name Here]
+* Bhoomika
 
 ---
 
