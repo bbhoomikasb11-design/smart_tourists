@@ -5,9 +5,15 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const path = require('path');
+const WebSocket = require('ws');
+const http = require('http');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Create HTTP server for WebSocket support
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 // Middleware
 app.use(cors());
@@ -47,7 +53,65 @@ db.serialize(() => {
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   )`);
+  
+  // Create emergency alerts table
+  db.run(`CREATE TABLE IF NOT EXISTS emergency_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tourist_id INTEGER NOT NULL,
+    tourist_name TEXT NOT NULL,
+    blockchain_id TEXT,
+    message TEXT NOT NULL,
+    location_lat REAL,
+    location_lng REAL,
+    location_accuracy REAL,
+    alert_type TEXT DEFAULT 'emergency',
+    status TEXT DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    responded_at DATETIME,
+    resolved_at DATETIME,
+    response_team TEXT,
+    notes TEXT,
+    FOREIGN KEY (tourist_id) REFERENCES users(id)
+  )`);
 });
+
+// WebSocket connection handling
+wss.on('connection', (ws) => {
+  console.log('New WebSocket connection established');
+  
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      console.log('Received WebSocket message:', data);
+    } catch (error) {
+      console.error('Invalid WebSocket message:', error);
+    }
+  });
+  
+  ws.on('close', () => {
+    console.log('WebSocket connection closed');
+  });
+  
+  // Send welcome message
+  ws.send(JSON.stringify({
+    type: 'connection',
+    message: 'Connected to emergency monitoring system'
+  }));
+});
+
+// Broadcast emergency alert to all connected WebSocket clients
+function broadcastEmergencyAlert(alert) {
+  const message = JSON.stringify({
+    type: 'emergency_alert',
+    alert: alert
+  });
+  
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
 
 // Generate blockchain ID (simplified version)
 function generateBlockchainId() {
@@ -121,11 +185,13 @@ app.post('/api/register', async (req, res) => {
 
       // Hash password
       const hashedPassword = await hashPassword(password);
+      // Generate blockchain ID at registration time
+      const blockchainId = generateBlockchainId();
       
-      // Insert new user (no blockchain ID yet)
+      // Insert new user with blockchain ID
       db.run(
-        'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-        [username, email, hashedPassword],
+        'INSERT INTO users (username, email, password, blockchain_id) VALUES (?, ?, ?, ?)',
+        [username, email, hashedPassword, blockchainId],
         function(err) {
           if (err) {
             return res.status(500).json({ 
@@ -136,8 +202,14 @@ app.post('/api/register', async (req, res) => {
           
           res.json({
             success: true,
-            message: 'User registered successfully. Please complete your profile to get your blockchain ID.',
-            userId: this.lastID
+            message: 'User registered successfully.',
+            user: {
+              id: this.lastID,
+              username: username,
+              email: email,
+              blockchain_id: blockchainId,
+              profile_completed: false
+            }
           });
         }
       );
@@ -198,7 +270,7 @@ app.post('/api/login', async (req, res) => {
           id: user.id,
           username: user.username,
           email: user.email,
-          blockchainId: user.blockchainId || null
+          blockchain_id: user.blockchain_id || null
         }
       });
     });
@@ -265,8 +337,8 @@ app.post('/api/profile', async (req, res) => {
         });
       }
 
-      // Generate blockchain ID now
-      const blockchainId = generateBlockchainId();
+      // Reuse existing blockchain ID from user if set; otherwise generate once
+      const blockchainId = req.body.blockchainId || generateBlockchainId();
 
       // Prepare data for encryption
       const profileData = {
@@ -281,7 +353,7 @@ app.post('/api/profile', async (req, res) => {
       // Encrypt the profile data
       const encryptedData = encryptData(profileData);
 
-      // Save profile with blockchain ID
+      // Save profile with blockchain ID (upsert-like behavior)
       db.run(
         `INSERT INTO tourist_profiles (user_id, blockchain_id, encrypted_data, updated_at) 
          VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
@@ -294,8 +366,8 @@ app.post('/api/profile', async (req, res) => {
             });
           }
 
-          // Update user with blockchain ID and profile completion status
-          db.run('UPDATE users SET blockchain_id = ?, profile_completed = TRUE WHERE id = ?', [blockchainId, userId]);
+          // Update user with blockchain ID (if not already) and mark profile completed
+          db.run('UPDATE users SET blockchain_id = COALESCE(blockchain_id, ?), profile_completed = TRUE WHERE id = ?', [blockchainId, userId]);
 
           res.json({
             success: true,
@@ -357,6 +429,242 @@ app.get('/api/health', (req, res) => {
     message: 'Smart Tourists Backend is running',
     timestamp: new Date().toISOString()
   });
+});
+
+// Emergency Alert Endpoints
+
+// Create emergency alert
+app.post('/api/emergency-alert', (req, res) => {
+  try {
+    const { touristId, touristName, blockchainId, message, location, timestamp, type, status } = req.body;
+    
+    if (!touristId || !touristName || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: touristId, touristName, message'
+      });
+    }
+
+    const alertData = {
+      tourist_id: touristId,
+      tourist_name: touristName,
+      blockchain_id: blockchainId || null,
+      message: message,
+      location_lat: location ? location.lat : null,
+      location_lng: location ? location.lng : null,
+      location_accuracy: location ? location.accuracy : null,
+      alert_type: type || 'emergency',
+      status: status || 'active'
+    };
+
+    db.run(
+      `INSERT INTO emergency_alerts (
+        tourist_id, tourist_name, blockchain_id, message, 
+        location_lat, location_lng, location_accuracy, 
+        alert_type, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        alertData.tourist_id,
+        alertData.tourist_name,
+        alertData.blockchain_id,
+        alertData.message,
+        alertData.location_lat,
+        alertData.location_lng,
+        alertData.location_accuracy,
+        alertData.alert_type,
+        alertData.status
+      ],
+      function(err) {
+        if (err) {
+          console.error('Error creating emergency alert:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to create emergency alert'
+          });
+        }
+
+        const alert = {
+          id: this.lastID,
+          ...alertData,
+          timestamp: new Date().toISOString()
+        };
+
+        // Broadcast to all connected WebSocket clients
+        broadcastEmergencyAlert(alert);
+
+        console.log(`🚨 EMERGENCY ALERT: ${touristName} - ${message}`);
+        
+        res.json({
+          success: true,
+          message: 'Emergency alert created successfully',
+          alertId: this.lastID,
+          alert: alert
+        });
+      }
+    );
+  } catch (error) {
+    console.error('Error processing emergency alert:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Get all emergency alerts
+app.get('/api/emergency-alerts', (req, res) => {
+  const status = req.query.status || 'active';
+  const limit = parseInt(req.query.limit) || 50;
+  
+  db.all(
+    'SELECT * FROM emergency_alerts WHERE status = ? ORDER BY created_at DESC LIMIT ?',
+    [status, limit],
+    (err, rows) => {
+      if (err) {
+        console.error('Error fetching emergency alerts:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to fetch emergency alerts'
+        });
+      }
+
+      const alerts = rows.map(row => ({
+        id: row.id,
+        touristId: row.tourist_id,
+        touristName: row.tourist_name,
+        blockchainId: row.blockchain_id,
+        message: row.message,
+        location: row.location_lat && row.location_lng ? {
+          lat: row.location_lat,
+          lng: row.location_lng,
+          accuracy: row.location_accuracy
+        } : null,
+        type: row.alert_type,
+        status: row.status,
+        timestamp: row.created_at,
+        respondedAt: row.responded_at,
+        resolvedAt: row.resolved_at,
+        responseTeam: row.response_team,
+        notes: row.notes
+      }));
+
+      res.json({
+        success: true,
+        alerts: alerts,
+        count: alerts.length
+      });
+    }
+  );
+});
+
+// Update emergency alert status
+app.put('/api/emergency-alert/:id', (req, res) => {
+  const alertId = req.params.id;
+  const { status, responseTeam, notes } = req.body;
+  
+  if (!status) {
+    return res.status(400).json({
+      success: false,
+      message: 'Status is required'
+    });
+  }
+
+  let updateQuery = 'UPDATE emergency_alerts SET status = ?';
+  let params = [status];
+  
+  if (status === 'responded' && !req.body.respondedAt) {
+    updateQuery += ', responded_at = CURRENT_TIMESTAMP';
+  }
+  
+  if (status === 'resolved' && !req.body.resolvedAt) {
+    updateQuery += ', resolved_at = CURRENT_TIMESTAMP';
+  }
+  
+  if (responseTeam) {
+    updateQuery += ', response_team = ?';
+    params.push(responseTeam);
+  }
+  
+  if (notes) {
+    updateQuery += ', notes = ?';
+    params.push(notes);
+  }
+  
+  updateQuery += ' WHERE id = ?';
+  params.push(alertId);
+
+  db.run(updateQuery, params, function(err) {
+    if (err) {
+      console.error('Error updating emergency alert:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update emergency alert'
+      });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Emergency alert not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Emergency alert updated successfully'
+    });
+  });
+});
+
+// Get emergency alert by ID
+app.get('/api/emergency-alert/:id', (req, res) => {
+  const alertId = req.params.id;
+  
+  db.get(
+    'SELECT * FROM emergency_alerts WHERE id = ?',
+    [alertId],
+    (err, row) => {
+      if (err) {
+        console.error('Error fetching emergency alert:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to fetch emergency alert'
+        });
+      }
+
+      if (!row) {
+        return res.status(404).json({
+          success: false,
+          message: 'Emergency alert not found'
+        });
+      }
+
+      const alert = {
+        id: row.id,
+        touristId: row.tourist_id,
+        touristName: row.tourist_name,
+        blockchainId: row.blockchain_id,
+        message: row.message,
+        location: row.location_lat && row.location_lng ? {
+          lat: row.location_lat,
+          lng: row.location_lng,
+          accuracy: row.location_accuracy
+        } : null,
+        type: row.alert_type,
+        status: row.status,
+        timestamp: row.created_at,
+        respondedAt: row.responded_at,
+        resolvedAt: row.resolved_at,
+        responseTeam: row.response_team,
+        notes: row.notes
+      };
+
+      res.json({
+        success: true,
+        alert: alert
+      });
+    }
+  );
 });
 
 // Admin endpoints for data viewing
@@ -486,9 +794,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontsheet.html'));
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server with WebSocket support
+server.listen(PORT, () => {
   console.log(`Smart Tourists Backend running on http://localhost:${PORT}`);
+  console.log(`WebSocket server running on ws://localhost:${PORT}`);
   console.log(`Database: tourists.db`);
   console.log(`Blockchain ID format: ST[timestamp][random]`);
 });

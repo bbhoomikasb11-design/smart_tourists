@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Satrangi Geo-Fencing Map</title>
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial; background: linear-gradient(135deg, #0b6ba5, #063f5e); }
+    .header{ position: fixed; left: 0; right: 0; top: 0; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; color: white; backdrop-filter: blur(6px); border-bottom: 1px solid rgba(255,255,255,0.18); }
+    .brand{ font-weight: 800; letter-spacing: .5px; }
+    .actions{ display: flex; gap: 8px }
+    .btn{ border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; padding: 8px 12px; border-radius: 10px; font-weight: 700; cursor: pointer }
+    #map { position: absolute; top: 64px; bottom: 0; left: 0; right: 0; }
+    .legend { position: absolute; bottom: 16px; left: 16px; background: rgba(255,255,255,0.95); border: 1px solid #e6eef4; border-radius: 12px; padding: 10px 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.12); font-size: 13px; }
+    .legend h4 { margin: 0 0 6px 0; color: #063f5e }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-weight:700; font-size:12px }
+    .blue { background:#e8f4fd; color:#0b6ba5; border:1px solid #cfe9ff }
+    .toolbox { position:absolute; top:76px; left:16px; display:flex; flex-direction:column; gap:8px; }
+    .tool { background:#ffffff; border:1px solid #e6eef4; padding:8px 12px; border-radius:10px; font-weight:700; color:#063f5e; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,0.08) }
+    .tool:hover{ background:#f6fbff }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">Satrangi Geo-Fencing</div>
+    <div class="actions">
+      <button class="btn" onclick="window.location.href='dashboard.html'">Dashboard</button>
+      <button class="btn" onclick="window.location.href='frontsheet.html'">Home</button>
+    </div>
+  </div>
+
+  <div id="map" role="region" aria-label="Tourist Safety Map"></div>
+
+  <div class="legend">
+    <h4>Map Layers</h4>
+    <div><span class="badge blue">Blue</span> Tourist-safe base theme</div>
+  </div>
+
+  <div class="toolbox" aria-label="Geofence Tools">
+    <button class="tool" id="drawCircleBtn">Add Circle Red Zone</button>
+    <button class="tool" id="drawPolygonBtn">Add Polygon Red Zone</button>
+    <button class="tool" id="clearZonesBtn">Clear Zones</button>
+    <button class="tool" id="startTrackBtn">Start Live Tracking</button>
+    <button class="tool" id="stopTrackBtn">Stop Tracking</button>
+  </div>
+
+  <script>
+    // Initialize and add the map
+    let map;
+    let drawingManager;
+    let overlays = [];
+    let touristMarker = null;
+    let accuracyCircle = null;
+    let watchId = null;
+
+    const blueStyle = [
+      { elementType: 'geometry', stylers: [{ color: '#eaf3fb' }] },
+      { elementType: 'labels.text.fill', stylers: [{ color: '#2a4a67' }] },
+      { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
+      { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#d7ebff' }] },
+      { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#cfe8ff' }] },
+      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+      { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#bcd7f0' }] },
+      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#9cc9f5' }] },
+      { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#2b587a' }] }
+    ];
+
+    function initMap() {
+      try {
+        // Example center: Shillong, Meghalaya (popular tourist spot)
+        const center = { lat: 25.5788, lng: 91.8933 };
+
+        map = new google.maps.Map(document.getElementById('map'), {
+          center,
+          zoom: 12,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+          zoomControl: true,
+          styles: blueStyle
+        });
+
+        console.log('✅ Google Maps initialized successfully');
+      } catch (error) {
+        console.error('❌ Google Maps initialization failed:', error);
+        document.getElementById('map').innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 20px;">
+            <h2>❌ Map Loading Error</h2>
+            <p style="margin: 20px 0;">There was an error loading the map. Please check your internet connection and try again.</p>
+            <button onclick="location.reload()" style="background: #15a4ff; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+              🔄 Retry
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      // Marker for center spot (standard marker for broad compatibility)
+      new google.maps.Marker({ map, position: center, title: 'Shillong - Popular Tourist Spot' });
+
+      // Drawing Manager for geofences
+      try {
+        drawingManager = new google.maps.drawing.DrawingManager({
+          drawingMode: null,
+          drawingControl: false,
+          circleOptions: {
+            fillColor: '#ff3b30', fillOpacity: 0.25, strokeColor: '#d93025', strokeOpacity: 0.9, strokeWeight: 2,
+            clickable: true, editable: true, zIndex: 100
+          },
+          polygonOptions: {
+            fillColor: '#ff3b30', fillOpacity: 0.25, strokeColor: '#d93025', strokeOpacity: 0.9, strokeWeight: 2,
+            clickable: true, editable: true, zIndex: 100
+          }
+        });
+        drawingManager.setMap(map);
+        console.log('✅ Drawing Manager initialized successfully');
+      } catch (error) {
+        console.error('❌ Drawing Manager initialization failed:', error);
+        // Hide drawing tools if drawing manager fails
+        document.querySelector('.toolbox').style.display = 'none';
+      }
+
+      // Add event listeners only if drawing manager was initialized successfully
+      if (drawingManager) {
+        google.maps.event.addListener(drawingManager, 'circlecomplete', (circle) => {
+          overlays.push(circle);
+          console.log('✅ Circle geofence added');
+        });
+        google.maps.event.addListener(drawingManager, 'polygoncomplete', (polygon) => {
+          overlays.push(polygon);
+          console.log('✅ Polygon geofence added');
+        });
+      }
+
+      // Wire toolbox buttons with error handling
+      document.getElementById('drawCircleBtn').addEventListener('click', () => {
+        if (drawingManager) {
+          drawingManager.setDrawingMode(google.maps.drawing.OverlayType.CIRCLE);
+        } else {
+          alert('Drawing tools are not available. Please check your Google Maps API configuration.');
+        }
+      });
+      document.getElementById('drawPolygonBtn').addEventListener('click', () => {
+        if (drawingManager) {
+          drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+        } else {
+          alert('Drawing tools are not available. Please check your Google Maps API configuration.');
+        }
+      });
+      document.getElementById('clearZonesBtn').addEventListener('click', () => {
+        overlays.forEach(o => o.setMap(null));
+        overlays = [];
+        console.log('✅ All geofences cleared');
+      });
+      document.getElementById('startTrackBtn').addEventListener('click', startTracking);
+      document.getElementById('stopTrackBtn').addEventListener('click', stopTracking);
+    }
+
+    function startTracking(){
+      if (!navigator.geolocation) { alert('Geolocation not supported'); return; }
+      if (watchId) return; // already tracking
+      watchId = navigator.geolocation.watchPosition(onLocation, onLocationError, {
+        enableHighAccuracy: true, maximumAge: 0, timeout: 10000
+      });
+    }
+
+    function stopTracking(){
+      if (watchId){ navigator.geolocation.clearWatch(watchId); watchId = null; }
+      if (accuracyCircle){ accuracyCircle.setMap(null); accuracyCircle = null; }
+    }
+
+    function onLocation(pos){
+      const { latitude, longitude, accuracy } = pos.coords;
+      const latLng = { lat: latitude, lng: longitude };
+
+      if (!touristMarker){
+        touristMarker = new google.maps.Marker({
+          map,
+          position: latLng,
+          title: 'Your location',
+          icon: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+        });
+        map.panTo(latLng);
+      } else {
+        touristMarker.setPosition(latLng);
+      }
+
+      if (accuracyCircle){ accuracyCircle.setMap(null); }
+      accuracyCircle = new google.maps.Circle({
+        map,
+        center: latLng,
+        radius: Math.max(accuracy, 20),
+        fillColor: '#3b82f6', fillOpacity: 0.12,
+        strokeColor: '#2563eb', strokeOpacity: 0.6, strokeWeight: 1
+      });
+    }
+
+    function onLocationError(err){
+      console.warn('Geolocation error', err);
+      alert('Unable to fetch live location. Please allow location access.');
+    }
+  </script>
+  <script>
+    // Check if Google Maps API key is properly configured
+    function checkApiKey() {
+      const script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap&libraries=drawing,geometry';
+      script.onerror = function() {
+        document.getElementById('map').innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 20px;">
+            <h2>🗺️ Google Maps Setup Required</h2>
+            <p style="margin: 20px 0; font-size: 16px; line-height: 1.6;">
+              To use the interactive map, you need to:<br><br>
+              1. Get a Google Maps API key from <a href="https://console.cloud.google.com/" target="_blank" style="color: #15a4ff;">Google Cloud Console</a><br>
+              2. Enable "Maps JavaScript API" and "Drawing Library"<br>
+              3. Replace "YOUR_GOOGLE_MAPS_API_KEY" in geofence.html with your actual key<br><br>
+              <strong>For now, you can use the demo mode below:</strong>
+            </p>
+            <button onclick="initDemoMap()" style="background: #15a4ff; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+              🎮 Try Demo Mode
+            </button>
+          </div>
+        `;
+      };
+      document.head.appendChild(script);
+    }
+
+    // Demo mode without Google Maps API
+    function initDemoMap() {
+      document.getElementById('map').innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 20px; background: linear-gradient(135deg, #0b6ba5, #063f5e);">
+          <h2>🎮 Demo Mode - Tourist Safety Map</h2>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; max-width: 600px;">
+            <h3>📍 Key Tourist Locations in North-East India</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                <strong>🏔️ Shillong, Meghalaya</strong><br>
+                <small>Living Root Bridges, Cherrapunji</small>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                <strong>🏔️ Gangtok, Sikkim</strong><br>
+                <small>Tsomgo Lake, Nathula Pass</small>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                <strong>🦏 Kaziranga, Assam</strong><br>
+                <small>One-horned Rhinos, Wildlife</small>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                <strong>🏛️ Tawang, Arunachal</strong><br>
+                <small>Tawang Monastery, Buddhist Culture</small>
+              </div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; max-width: 600px;">
+            <h3>🚨 Safety Features</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+              <div style="background: rgba(255,59,48,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,59,48,0.3);">
+                <strong>🔴 Red Zones</strong><br>
+                <small>Restricted areas, border zones</small>
+              </div>
+              <div style="background: rgba(59,130,246,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(59,130,246,0.3);">
+                <strong>🔵 Safe Areas</strong><br>
+                <small>Tourist-friendly locations</small>
+              </div>
+              <div style="background: rgba(34,197,94,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(34,197,94,0.3);">
+                <strong>🟢 Emergency</strong><br>
+                <small>Hospitals, police stations</small>
+              </div>
+            </div>
+          </div>
+          <p style="margin-top: 20px; opacity: 0.8;">
+            <strong>Note:</strong> This is a demo version. For full interactive map functionality, please set up a Google Maps API key.
+          </p>
+        </div>
+      `;
+    }
+
+    // Initialize the map
+    checkApiKey();
+  </script>
+</body>
+</html>

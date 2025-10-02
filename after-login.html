@@ -15,7 +15,7 @@
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
       background: rgba(255, 255, 255, 0.95);
       border-radius: 25px;
@@ -51,6 +51,8 @@
 
     .content {
       padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     .form-section {
@@ -114,6 +116,83 @@
     .form-group textarea {
       height: 100px;
       resize: vertical;
+    }
+
+    /* Photo upload styles */
+    .photo-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .photo-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #0073e6;
+      object-fit: cover;
+      box-shadow: 0 8px 20px rgba(0, 115, 230, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .photo-preview:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 25px rgba(0, 115, 230, 0.4);
+    }
+
+    .photo-upload-btn {
+      background: linear-gradient(135deg, #0073e6, #005bb5);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 24px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .photo-upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 115, 230, 0.4);
+    }
+
+    .photo-input {
+      display: none;
+    }
+
+    .unique-id-display {
+      background: linear-gradient(135deg, #e8f4fd, #f0f8ff);
+      border: 2px solid #0073e6;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0, 115, 230, 0.15);
+    }
+
+    .unique-id-display h3 {
+      color: #003366;
+      margin: 0 0 10px 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .unique-id {
+      font-family: 'Courier New', monospace;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #0073e6;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid #b8daff;
+      display: inline-block;
+      margin: 10px 0;
     }
 
     .submit-btn {
@@ -229,6 +308,7 @@
     }
 
     @media (max-width: 768px) {
+      .content {grid-template-columns: 1fr}
       .form-grid {
         grid-template-columns: 1fr;
       }
@@ -254,18 +334,32 @@
       <div id="messageContainer"></div>
       <button type="button" onclick="document.getElementById('messageContainer').innerHTML=''" style="background: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9em; cursor: pointer; margin-bottom: 10px; display: none;" id="clearMessagesBtn">Clear Messages</button>
 
-      <form id="touristForm">
+      <form id="touristForm" style="animation: fadeUp .35s ease">
         <!-- Personal Information Section -->
         <div class="form-section">
           <h2 class="section-title">Personal Information</h2>
+          
+          <!-- Photo Upload Section -->
+          <div class="photo-upload">
+            <img id="photoPreview" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiByeD0iNjAiIGZpbGw9IiNmMGY4ZmYiLz4KPHN2ZyB4PSIzMCIgeT0iMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMDA3M2U2Ij4KPHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPgo8L3N2Zz4KPC9zdmc+" alt="Profile Photo" class="photo-preview">
+            <input type="file" id="photoInput" class="photo-input" accept="image/*">
+            <button type="button" class="photo-upload-btn" onclick="document.getElementById('photoInput').click()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              Upload Profile Photo
+            </button>
+            <small style="color: #666; text-align: center;">Upload a clear photo of yourself (JPG, PNG, max 5MB)</small>
+          </div>
+
           <div class="form-grid">
             <div class="form-group">
               <label for="fullName">Full Name *</label>
               <input type="text" id="fullName" placeholder="Enter your full name" required>
             </div>
             <div class="form-group">
-              <label for="age">Age *</label>
-              <input type="number" id="age" placeholder="Your age" min="18" max="100" required>
+              <label for="dateOfBirth">Date of Birth *</label>
+              <input type="date" id="dateOfBirth" required>
             </div>
             <div class="form-group">
               <label for="phone">Phone Number *</label>
@@ -416,6 +510,8 @@
     const submitBtn = document.getElementById('submitBtn');
     const messageContainer = document.getElementById('messageContainer');
     const container = document.querySelector('.container');
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
 
     // Check if user is logged in
     window.addEventListener('load', () => {
@@ -435,6 +531,16 @@
       
       // Check if profile already exists
       if (user.blockchainId) {
+        // Show banner with assigned blockchain ID after registration
+        messageContainer.innerHTML = `
+          <div class="unique-id-display" style="animation: fadeUp .3s ease">
+            <h3>🎉 Your Unique Tourist ID</h3>
+            <div class="unique-id">${user.blockchainId}</div>
+            <p style="margin: 10px 0; color: #666;">This unique ID was assigned during registration. Complete your profile below to personalize your experience!</p>
+            <button onclick="window.location.href='dashboard.html'" style="background:#0073e6;color:#fff;padding:10px 18px;border:none;border-radius:8px;font-weight:700;cursor:pointer">Go to Dashboard →</button>
+          </div>
+        `;
+        document.getElementById('clearMessagesBtn').style.display = 'inline-block';
         checkExistingProfile(user.blockchainId);
       }
     });
@@ -489,10 +595,34 @@
       return Array.from(checkboxes).map(cb => cb.value);
     }
 
+    // Photo upload handler
+    photoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showMessage('Photo size must be less than 5MB');
+          return;
+        }
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          showMessage('Please select a valid image file');
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          photoPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
     // Validate form
     function validateForm() {
       const requiredFields = [
-        'fullName', 'age', 'phone', 'nationality', 'address',
+        'fullName', 'dateOfBirth', 'phone', 'nationality', 'address',
         'arrivalDate', 'departureDate', 'travelGroup', 'budget',
         'accommodationType', 'preferredLocation'
       ];
@@ -504,6 +634,21 @@
           element.focus();
           return false;
         }
+      }
+
+      // Validate date of birth
+      const dob = new Date(document.getElementById('dateOfBirth').value);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      
+      if (age < 18) {
+        showMessage('You must be at least 18 years old to register');
+        return false;
+      }
+      
+      if (age > 100) {
+        showMessage('Please enter a valid date of birth');
+        return false;
       }
 
       // Validate dates
@@ -540,10 +685,11 @@
         userId: user.id,
         personalInfo: {
           fullName: document.getElementById('fullName').value.trim(),
-          age: parseInt(document.getElementById('age').value),
+          dateOfBirth: document.getElementById('dateOfBirth').value,
           phone: document.getElementById('phone').value.trim(),
           nationality: document.getElementById('nationality').value,
-          address: document.getElementById('address').value.trim()
+          address: document.getElementById('address').value.trim(),
+          photo: photoPreview.src // Base64 encoded photo
         },
         travelInfo: {
           arrivalDate: document.getElementById('arrivalDate').value,
@@ -574,8 +720,8 @@
         const data = await response.json();
 
         if (data.success) {
-          // Update user data with new blockchain ID
-          const updatedUser = { ...user, blockchainId: data.blockchainId };
+          // Update user data with profile completion status
+          const updatedUser = { ...user, profileCompleted: true };
           localStorage.setItem('user', JSON.stringify(updatedUser));
           
           // Show success message with blockchain ID
@@ -609,6 +755,7 @@
         setLoading(false);
       }
     }
+
 
     // Event listeners
     form.addEventListener('submit', handleSubmit);

@@ -262,13 +262,29 @@
         const data = await response.json();
 
         if (data.success) {
-          showMessage(`Registration successful! Please complete your profile to get your blockchain ID.`, 'success');
+          // Store user data in localStorage for dashboard access
+          const userData = {
+            id: data.user.id,
+            username: data.user.username,
+            email: data.user.email,
+            blockchainId: data.user.blockchain_id,
+            profileCompleted: false
+          };
           
-          // Show continue button
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('isLoggedIn', 'true');
+          
+          showMessage(`Registration successful! Your unique blockchain ID has been generated.`, 'success');
+          
+          // Show continue button with blockchain ID
           messageContainer.innerHTML += `
             <div class="blockchain-info">
               <strong>Account Created Successfully!</strong><br>
-              <small>Complete your profile to get your unique blockchain ID</small>
+              <div style="margin: 10px 0; padding: 10px; background: #f0f8ff; border-radius: 8px; border: 1px solid #b8daff;">
+                <strong>Your Blockchain ID:</strong><br>
+                <span style="font-family: 'Courier New', monospace; font-weight: bold; color: #0073e6;">${data.user.blockchain_id}</span>
+              </div>
+              <small>Complete your profile to personalize your experience</small>
               <br><br>
               <button onclick="window.location.href='after-login.html'" style="background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
                 Continue to Profile Setup →

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Authority Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#1a1a2e;
+      --bg2:#16213e;
+      --ink:#ffffff;
+      --card:#2a2a3e;
+      --muted:#8892b0;
+      --accent:#64ffda;
+      --safe:#4caf50;
+      --warn:#f44336;
+      --urgent:#ff5722;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Roboto,system-ui,-apple-system,'Segoe UI',Poppins,Arial;background:linear-gradient(135deg,var(--bg),var(--bg2));min-height:100vh;color:var(--ink)}
+
+    /* Header */
+    .header{background:rgba(42,42,62,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(100,255,218,0.2);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px}
+    .logo svg{color:var(--accent)}
+    .header-actions{display:flex;gap:12px;align-items:center}
+    .status-indicator{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:rgba(76,175,80,0.2);border:1px solid rgba(76,175,80,0.3)}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--safe);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+    /* Layout */
+    .dashboard{display:grid;grid-template-columns:300px 1fr 350px;gap:20px;padding:20px;min-height:calc(100vh - 80px)}
+    
+    /* Sidebar */
+    .sidebar{background:var(--card);border-radius:12px;padding:20px;height:fit-content;border:1px solid rgba(100,255,218,0.1)}
+    .sidebar h3{margin:0 0 16px 0;color:var(--accent);font-size:16px;text-transform:uppercase;letter-spacing:0.5px}
+    .stat-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.1)}
+    .stat-item:last-child{border-bottom:none}
+    .stat-value{font-weight:700;font-size:18px}
+    .stat-value.danger{color:var(--warn)}
+    .stat-value.safe{color:var(--safe)}
+    .stat-value.warning{color:var(--urgent)}
+
+    /* Main Content */
+    .main-content{display:flex;flex-direction:column;gap:20px}
+    .section{background:var(--card);border-radius:12px;padding:20px;border:1px solid rgba(100,255,218,0.1)}
+    .section-header{display:flex;align-items:center;justify-content:between;margin-bottom:16px}
+    .section-title{font-size:18px;font-weight:700;color:var(--accent);margin:0}
+    .refresh-btn{background:rgba(100,255,218,0.2);border:1px solid rgba(100,255,218,0.3);border-radius:8px;padding:8px 16px;color:var(--accent);cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:0.5px}
+    .refresh-btn:hover{background:rgba(100,255,218,0.3)}
+
+    /* Tourist List */
+    .tourist-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .tourist-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:16px;transition:all 0.3s}
+    .tourist-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .tourist-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .tourist-photo{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)}
+    .tourist-info h4{margin:0;font-size:14px;color:var(--ink)}
+    .tourist-info p{margin:2px 0 0 0;font-size:12px;color:var(--muted)}
+    .tourist-status{display:inline-block;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;text-transform:uppercase}
+    .status-safe{background:rgba(76,175,80,0.2);color:var(--safe);border:1px solid rgba(76,175,80,0.3)}
+    .status-danger{background:rgba(244,67,54,0.2);color:var(--warn);border:1px solid rgba(244,67,54,0.3)}
+    .status-warning{background:rgba(255,87,34,0.2);color:var(--urgent);border:1px solid rgba(255,87,34,0.3)}
+    .tourist-location{font-size:12px;color:var(--muted);margin-top:8px}
+    .location-link{color:var(--accent);text-decoration:none}
+    .location-link:hover{text-decoration:underline}
+
+    /* Alerts Panel */
+    .alerts-panel{background:var(--card);border-radius:12px;padding:20px;height:fit-content;border:1px solid rgba(100,255,218,0.1)}
+    .alert-item{background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:16px;margin-bottom:16px;position:relative}
+    .alert-item.urgent{animation:urgentAlert 2s infinite}
+    @keyframes urgentAlert{0%,100%{border-color:rgba(244,67,54,0.3)}50%{border-color:rgba(244,67,54,0.8)}}
+    .alert-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .alert-type{background:var(--warn);color:#fff;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600;text-transform:uppercase}
+    .alert-time{font-size:11px;color:var(--muted)}
+    .alert-tourist{font-weight:600;color:var(--ink);margin-bottom:4px}
+    .alert-message{font-size:14px;line-height:1.4;margin-bottom:8px}
+    .alert-location{font-size:12px;color:var(--muted)}
+    .alert-actions{display:flex;gap:8px;margin-top:12px}
+    .alert-btn{padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:600;text-transform:uppercase}
+    .btn-respond{background:var(--safe);color:#fff}
+    .btn-dismiss{background:rgba(255,255,255,0.1);color:var(--muted);border:1px solid rgba(255,255,255,0.2)}
+    .btn-track{background:var(--accent);color:var(--bg)}
+
+    /* Map Container */
+    .map-container{height:300px;background:rgba(255,255,255,0.05);border-radius:8px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+
+    /* Responsive */
+    @media (max-width: 1200px){
+      .dashboard{grid-template-columns:1fr;gap:16px}
+      .alerts-panel{order:-1}
+    }
+    @media (max-width: 768px){
+      .header{padding:12px 16px}
+      .dashboard{padding:16px}
+      .tourist-grid{grid-template-columns:1fr}
+    }
+
+    /* Real-time indicators */
+    .live-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--safe)}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:var(--safe);animation:livePulse 1.5s infinite}
+    @keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.2)}}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6l8-4z"/>
+      </svg>
+      <span>Emergency Authority Dashboard</span>
+    </div>
+    <div class="header-actions">
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span>System Online</span>
+      </div>
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span>Live Monitoring</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard">
+    <!-- Statistics Sidebar -->
+    <aside class="sidebar">
+      <h3>📊 System Statistics</h3>
+      <div class="stat-item">
+        <span>Active Tourists</span>
+        <span class="stat-value safe" id="activeTourists">0</span>
+      </div>
+      <div class="stat-item">
+        <span>Emergency Alerts</span>
+        <span class="stat-value danger" id="emergencyAlerts">0</span>
+      </div>
+      <div class="stat-item">
+        <span>Resolved Today</span>
+        <span class="stat-value safe" id="resolvedToday">0</span>
+      </div>
+      <div class="stat-item">
+        <span>Response Time (Avg)</span>
+        <span class="stat-value" id="responseTime">--</span>
+      </div>
+      <div class="stat-item">
+        <span>High Risk Areas</span>
+        <span class="stat-value warning" id="riskAreas">3</span>
+      </div>
+      
+      <h3 style="margin-top:24px">🎛️ Quick Actions</h3>
+      <button class="refresh-btn" onclick="refreshAllData()" style="width:100%;margin-bottom:8px">
+        🔄 Refresh All Data
+      </button>
+      <button class="refresh-btn" onclick="exportReports()" style="width:100%;margin-bottom:8px">
+        📊 Export Reports
+      </button>
+      <button class="refresh-btn" onclick="viewMap()" style="width:100%">
+        🗺️ View Live Map
+      </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Active Tourists Section -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">👥 Active Tourists</h2>
+          <button class="refresh-btn" onclick="loadTourists()">Refresh</button>
+        </div>
+        <div class="tourist-grid" id="touristGrid">
+          <!-- Tourist cards will be loaded here -->
+        </div>
+      </section>
+
+      <!-- Live Tracking Map -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">🗺️ Live Location Tracking</h2>
+          <button class="refresh-btn" onclick="refreshMap()">Refresh Map</button>
+        </div>
+        <div class="map-container" id="trackingMap">
+          <div style="text-align:center">
+            <div style="font-size:48px;margin-bottom:16px">🗺️</div>
+            <div>Live GPS tracking map will be displayed here</div>
+            <div style="font-size:12px;margin-top:8px;opacity:0.7">Click "View Live Map" to open full-screen tracking</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Emergency Alerts Panel -->
+    <aside class="alerts-panel">
+      <h3>🚨 Emergency Alerts</h3>
+      <div id="alertsList">
+        <!-- Emergency alerts will be loaded here -->
+      </div>
+      
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1)">
+        <h4 style="margin:0 0 12px 0;color:var(--accent);font-size:14px">📞 Emergency Contacts</h4>
+        <div style="font-size:12px;line-height:1.6;color:var(--muted)">
+          <div>Police Control: 100</div>
+          <div>Ambulance: 108</div>
+          <div>Fire: 101</div>
+          <div>All Emergency: 112</div>
+          <div>Tourist Helpline: 1800-11-1363</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // Global variables
+    let tourists = [];
+    let alerts = [];
+    let wsConnection = null;
+
+    // Initialize dashboard
+    function initDashboard() {
+      loadTourists();
+      loadAlerts();
+      connectWebSocket();
+      updateStatistics();
+      
+      // Auto-refresh every 30 seconds
+      setInterval(() => {
+        loadTourists();
+        loadAlerts();
+        updateStatistics();
+      }, 30000);
+    }
+
+    // Load tourists data
+    async function loadTourists() {
+      try {
+        const response = await fetch('http://localhost:3000/api/admin/users');
+        const data = await response.json();
+        
+        if (data.success) {
+          tourists = data.users;
+          renderTourists();
+        }
+      } catch (error) {
+        console.error('Error loading tourists:', error);
+      }
+    }
+
+    // Render tourists grid
+    function renderTourists() {
+      const grid = document.getElementById('touristGrid');
+      
+      if (tourists.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">No active tourists found</div>';
+        return;
+      }
+
+      grid.innerHTML = tourists.map(tourist => {
+        const status = getRandomStatus(); // In real app, this would come from live data
+        const location = getRandomLocation(); // In real app, this would come from GPS
+        
+        return `
+          <div class="tourist-card">
+            <div class="tourist-header">
+              <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iMjAiIGZpbGw9IiNmMGY4ZmYiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNzNlNiI+CjxwYXRoIGQ9Ik0xMiAxMmMyLjIxIDAgNC0xLjc5IDQtNHMtMS43OS00LTQtNC00IDEuNzktNCA0IDEuNzkgNCA0IDR6bTAgMmMtMi42NyAwLTggMS4zNC04IDR2MmgxNnYtMmMwLTIuNjYtNS4zMy00LTgtNHoiLz4KPC9zdmc+Cjwvc3ZnPg==" alt="Tourist" class="tourist-photo">
+              <div class="tourist-info">
+                <h4>${tourist.username}</h4>
+                <p>ID: ${tourist.blockchain_id || 'N/A'}</p>
+              </div>
+            </div>
+            <div class="tourist-status status-${status.class}">${status.text}</div>
+            <div class="tourist-location">
+              📍 <a href="https://maps.google.com/?q=${location.lat},${location.lng}" target="_blank" class="location-link">
+                ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}
+              </a>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px">
+              Last seen: ${new Date().toLocaleTimeString()}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Load emergency alerts
+    async function loadAlerts() {
+      try {
+        const response = await fetch('http://localhost:3000/api/emergency-alerts');
+        const data = await response.json();
+        
+        if (data.success) {
+          alerts = data.alerts || [];
+          renderAlerts();
+        }
+      } catch (error) {
+        console.error('Error loading alerts:', error);
+        // Show demo alerts if backend is not available
+        showDemoAlerts();
+      }
+    }
+
+    // Render alerts panel
+    function renderAlerts() {
+      const alertsList = document.getElementById('alertsList');
+      
+      if (alerts.length === 0) {
+        alertsList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:14px">No active alerts</div>';
+        return;
+      }
+
+      alertsList.innerHTML = alerts.map(alert => `
+        <div class="alert-item ${alert.type === 'emergency' ? 'urgent' : ''}">
+          <div class="alert-header">
+            <span class="alert-type">${alert.type}</span>
+            <span class="alert-time">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <div class="alert-tourist">${alert.touristName} (ID: ${alert.blockchainId})</div>
+          <div class="alert-message">${alert.message}</div>
+          <div class="alert-location">
+            📍 Location: ${alert.location ? `${alert.location.lat.toFixed(4)}, ${alert.location.lng.toFixed(4)}` : 'Unknown'}
+          </div>
+          <div class="alert-actions">
+            <button class="alert-btn btn-respond" onclick="respondToAlert('${alert.id}')">Respond</button>
+            <button class="alert-btn btn-track" onclick="trackTourist('${alert.touristId}')">Track</button>
+            <button class="alert-btn btn-dismiss" onclick="dismissAlert('${alert.id}')">Dismiss</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Show demo alerts when backend is not available
+    function showDemoAlerts() {
+      const demoAlerts = [
+        {
+          id: 'demo1',
+          type: 'emergency',
+          touristName: 'Demo Tourist',
+          blockchainId: 'DEMO123',
+          message: 'HELP! I am lost in the forest near Shillong. Cannot find the way back.',
+          location: { lat: 25.5788, lng: 91.8933 },
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: 'demo2',
+          type: 'emergency',
+          touristName: 'Test User',
+          blockchainId: 'TEST456',
+          message: 'Emergency! Car accident on highway. Need immediate help.',
+          location: { lat: 26.1445, lng: 91.7362 },
+          timestamp: new Date(Date.now() - 300000).toISOString()
+        }
+      ];
+      
+      alerts = demoAlerts;
+      renderAlerts();
+    }
+
+    // Update statistics
+    function updateStatistics() {
+      document.getElementById('activeTourists').textContent = tourists.length;
+      document.getElementById('emergencyAlerts').textContent = alerts.filter(a => a.type === 'emergency').length;
+      document.getElementById('resolvedToday').textContent = Math.floor(Math.random() * 10);
+      document.getElementById('responseTime').textContent = '2.3 min';
+    }
+
+    // Alert actions
+    function respondToAlert(alertId) {
+      alert(`Dispatching emergency response team for alert ${alertId}`);
+      // In real app, this would trigger emergency response protocols
+    }
+
+    function trackTourist(touristId) {
+      alert(`Opening live tracking for tourist ${touristId}`);
+      // In real app, this would open detailed tracking view
+    }
+
+    function dismissAlert(alertId) {
+      alerts = alerts.filter(a => a.id !== alertId);
+      renderAlerts();
+      updateStatistics();
+    }
+
+    // Utility functions
+    function getRandomStatus() {
+      const statuses = [
+        { class: 'safe', text: 'Safe' },
+        { class: 'safe', text: 'Exploring' },
+        { class: 'warning', text: 'In Transit' },
+        { class: 'safe', text: 'At Hotel' }
+      ];
+      return statuses[Math.floor(Math.random() * statuses.length)];
+    }
+
+    function getRandomLocation() {
+      // Random locations in North-East India
+      const locations = [
+        { lat: 25.5788, lng: 91.8933 }, // Shillong
+        { lat: 27.3314, lng: 88.6138 }, // Gangtok
+        { lat: 26.1445, lng: 91.7362 }, // Guwahati
+        { lat: 25.6751, lng: 94.1086 }, // Imphal
+        { lat: 27.1024, lng: 93.6919 }  // Itanagar
+      ];
+      return locations[Math.floor(Math.random() * locations.length)];
+    }
+
+    // Dashboard actions
+    function refreshAllData() {
+      loadTourists();
+      loadAlerts();
+      updateStatistics();
+      alert('All data refreshed successfully!');
+    }
+
+    function exportReports() {
+      alert('Exporting emergency reports... (Feature coming soon)');
+    }
+
+    function viewMap() {
+      window.open('geofence.html', '_blank');
+    }
+
+    function refreshMap() {
+      alert('Map refreshed with latest tourist locations');
+    }
+
+    // WebSocket connection for real-time updates
+    function connectWebSocket() {
+      try {
+        wsConnection = new WebSocket('ws://localhost:3000');
+        
+        wsConnection.onopen = function() {
+          console.log('WebSocket connected to emergency system');
+        };
+        
+        wsConnection.onmessage = function(event) {
+          const data = JSON.parse(event.data);
+          if (data.type === 'emergency_alert') {
+            alerts.unshift(data.alert);
+            renderAlerts();
+            updateStatistics();
+            
+            // Show browser notification
+            if (Notification.permission === 'granted') {
+              new Notification('Emergency Alert!', {
+                body: `${data.alert.touristName}: ${data.alert.message}`,
+                icon: '/favicon.ico'
+              });
+            }
+          }
+        };
+        
+        wsConnection.onerror = function(error) {
+          console.log('WebSocket error:', error);
+        };
+        
+        wsConnection.onclose = function() {
+          console.log('WebSocket connection closed');
+          // Attempt to reconnect after 5 seconds
+          setTimeout(connectWebSocket, 5000);
+        };
+      } catch (error) {
+        console.log('WebSocket not available, using polling instead');
+      }
+    }
+
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // Initialize dashboard when page loads
+    window.addEventListener('load', initDashboard);
+  </script>
+</body>
+</html>

@@ -337,44 +337,19 @@
         const data = await response.json();
 
         if (data.success) {
-          // Store user data in localStorage
-          localStorage.setItem('user', JSON.stringify(data.user));
-          localStorage.setItem('isLoggedIn', 'true');
+          // Store user data in localStorage with consistent field names
+          const userData = {
+            id: data.user.id,
+            username: data.user.username,
+            email: data.user.email,
+            blockchainId: data.user.blockchain_id,
+            profileCompleted: false
+          };
           
-          if (data.user.blockchainId) {
-            showMessage(`Welcome back, ${data.user.username}! Your Blockchain ID: ${data.user.blockchainId}`, 'success');
-            
-            // Show blockchain info and continue button
-            messageContainer.innerHTML += `
-              <div class="blockchain-info">
-                <strong>Your Blockchain ID:</strong><br>
-                <span class="blockchain-id">${data.user.blockchainId}</span><br>
-                <small>This ID uniquely identifies you in our system</small>
-                <br><br>
-              <button onclick="window.location.href='dashboard.html'" style="background: #0073e6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-                Continue to Dashboard →
-              </button>
-              </div>
-            `;
-          } else {
-            showMessage(`Welcome back, ${data.user.username}! Please complete your profile to get your blockchain ID.`, 'success');
-            
-            // Show continue button for profile completion
-            messageContainer.innerHTML += `
-              <div class="blockchain-info">
-                <strong>Complete Your Profile</strong><br>
-                <small>Get your unique blockchain ID by completing your tourist profile</small>
-                <br><br>
-                <button onclick="window.location.href='after-login.html'" style="background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-                  Continue to Profile Setup →
-                </button>
-                <div style="height:8px"></div>
-                <button onclick="window.location.href='dashboard.html'" style="background: #0b6ba5; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                  Skip for now → Dashboard
-                </button>
-              </div>
-            `;
-          }
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('isLoggedIn', 'true');
+          // No messages; go directly to dashboard
+          window.location.href = 'dashboard.html';
         } else {
           showMessage(data.message || 'Login failed. Please check your credentials.');
         }

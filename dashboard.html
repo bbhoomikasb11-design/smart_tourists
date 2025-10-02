@@ -20,8 +20,9 @@
     body{margin:0;font-family:Roboto,system-ui,-apple-system,'Segoe UI',Poppins,Arial;background:linear-gradient(135deg,var(--bg),var(--bg2));min-height:100vh}
 
     /* Layout */
-    .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    .layout{display:grid;grid-template-columns:280px 1fr 300px;min-height:100vh}
     .sidebar{background:rgba(255,255,255,0.96);border-right:1px solid #e6eef4;padding:18px 16px;position:sticky;top:0;height:100vh;overflow:auto}
+    .safety-panel{background:rgba(255,255,255,0.96);border-left:1px solid #e6eef4;padding:18px 16px;position:sticky;top:0;height:100vh;overflow:auto}
     .brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--ink)}
     .brand svg{color:var(--accent)}
     .menu-title{margin:18px 0 8px 0;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
@@ -31,6 +32,11 @@
     .content{padding:20px}
     .topbar{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);backdrop-filter: blur(6px);padding:14px 16px;border-radius:14px;color:#fff}
     .top-actions{display:flex;gap:10px}
+    .user-profile{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.15);padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.2)}
+    .user-photo{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3)}
+    .user-info{display:flex;flex-direction:column}
+    .user-name{font-weight:700;font-size:14px;margin:0}
+    .user-dob{font-size:12px;opacity:0.8;margin:0}
     .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
     .btn.primary{background:var(--accent);color:#00263b}
     .btn.ghost{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3)}
@@ -52,12 +58,28 @@
 
     /* Safety panel sections */
     .info{display:flex;flex-direction:column;gap:10px}
-    .info .item{display:flex;gap:10px}
-    .info .icon{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:#eef6fc;color:#0b6ba5}
+    .info .item{display:flex;gap:10px;padding:8px;border-radius:8px;background:#f8fafc;border:1px solid #eef3f8}
+    .info .icon{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:#eef6fc;color:#0b6ba5;flex-shrink:0}
     .safe{color:var(--safe);font-weight:700}
     .danger{color:var(--warn);font-weight:700}
+    
+    /* Safety panel specific styles */
+    .safety-section{margin-bottom:20px}
+    .safety-section h3{margin:0 0 12px 0;font-size:14px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.5px}
+    .red-zone-item{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;margin-bottom:8px}
+    .red-zone-item .zone-name{font-weight:700;color:var(--warn);margin-bottom:4px}
+    .red-zone-item .zone-desc{font-size:12px;color:#7f1d1d}
+    .maps-btn{width:100%;background:var(--accent);color:#00263b;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-top:10px;transition:all 0.2s}
+    .maps-btn:hover{background:#0d8ce8;transform:translateY(-1px)}
+    .emergency-contact{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px;margin-bottom:8px}
+    .emergency-contact .contact-name{font-weight:700;color:#0c4a6e;margin-bottom:2px}
+    .emergency-contact .contact-number{font-size:12px;color:#075985}
 
     /* Responsive */
+    @media (max-width: 1200px){
+      .layout{grid-template-columns:280px 1fr}
+      .safety-panel{display:none}
+    }
     @media (max-width: 980px){
       .layout{grid-template-columns:1fr}
       .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .2s ease;z-index:30;width:280px}
@@ -68,6 +90,40 @@
     }
     .hamburger{display:none;gap:6px;flex-direction:column;cursor:pointer}
     .bar{width:22px;height:3px;background:#fff;border-radius:2px}
+
+    /* Emergency Chatbot Styles */
+    .emergency-chatbot{position:fixed;bottom:20px;right:20px;z-index:1000;width:350px;height:500px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);border:1px solid #e6eef4;display:none;flex-direction:column;overflow:hidden}
+    .chatbot-header{background:linear-gradient(135deg,var(--warn),#ff4757);color:#fff;padding:16px;display:flex;align-items:center;justify-content:space-between;font-weight:700}
+    .chatbot-header .status{display:flex;align-items:center;gap:8px}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .chatbot-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px}
+    .chatbot-messages{flex:1;padding:16px;overflow-y:auto;background:#f8fafc}
+    .message{margin-bottom:12px;display:flex;flex-direction:column}
+    .message.user{align-items:flex-end}
+    .message.bot{align-items:flex-start}
+    .message-bubble{max-width:80%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.4}
+    .message.user .message-bubble{background:var(--accent);color:#fff}
+    .message.bot .message-bubble{background:#fff;border:1px solid #e6eef4;color:var(--ink)}
+    .message.emergency .message-bubble{background:var(--warn);color:#fff;font-weight:600;animation:emergencyPulse 1s infinite}
+    @keyframes emergencyPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+    .message-time{font-size:11px;color:var(--muted);margin-top:4px}
+    .chatbot-input{padding:16px;border-top:1px solid #e6eef4;background:#fff}
+    .input-container{display:flex;gap:8px;align-items:center}
+    .chat-input{flex:1;border:1px solid #e6eef4;border-radius:20px;padding:10px 16px;font-size:14px;outline:none}
+    .chat-input:focus{border-color:var(--accent)}
+    .voice-btn{background:var(--warn);border:none;border-radius:50%;width:40px;height:40px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+    .voice-btn:hover{background:#c82333;transform:scale(1.05)}
+    .voice-btn.recording{background:#28a745;animation:recordingPulse 1s infinite}
+    @keyframes recordingPulse{0%,100%{box-shadow:0 0 0 0 rgba(40,167,69,0.7)}50%{box-shadow:0 0 0 10px rgba(40,167,69,0)}}
+    .send-btn{background:var(--accent);border:none;border-radius:50%;width:40px;height:40px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .send-btn:hover{background:#0d8ce8}
+    .emergency-toggle{position:fixed;bottom:20px;right:20px;z-index:999;width:60px;height:60px;border-radius:50%;background:var(--warn);border:none;color:#fff;cursor:pointer;box-shadow:0 8px 25px rgba(220,53,69,0.4);display:flex;align-items:center;justify-content:center;font-size:24px;transition:all 0.3s}
+    .emergency-toggle:hover{background:#c82333;transform:scale(1.1)}
+    .emergency-toggle.active{background:var(--safe)}
+    .location-status{background:rgba(40,167,69,0.1);border:1px solid rgba(40,167,69,0.3);border-radius:8px;padding:8px;margin:8px 0;font-size:12px;color:var(--safe);text-align:center}
+    .danger-detected{background:rgba(220,53,69,0.1);border:1px solid rgba(220,53,69,0.3);border-radius:8px;padding:12px;margin:8px 0;color:var(--warn);font-weight:600;text-align:center;animation:dangerAlert 2s infinite}
+    @keyframes dangerAlert{0%,100%{background:rgba(220,53,69,0.1)}50%{background:rgba(220,53,69,0.2)}}
   </style>
 </head>
 <body>
@@ -82,31 +138,9 @@
       <a class="navlink" href="frontsheet.html">Home</a>
       <a class="navlink" href="after-login.html">Complete Profile</a>
       <a class="navlink" href="dashboard.html">Dashboard</a>
+      <a class="navlink" href="authority.html" target="_blank" style="color:var(--warn)">🚨 Authority Dashboard</a>
       <button class="navlink" style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef3f8" onclick="logout()">Logout</button>
 
-      <div class="menu-title">Safety & Essentials</div>
-      <div class="info">
-        <div class="item"><span class="icon">🧭</span><div>
-          <div class="name">How to behave</div>
-          <div class="sub">Respect local customs; ask before photos; dress modestly in villages.</div>
-        </div></div>
-        <div class="item"><span class="icon">🛡️</span><div>
-          <div class="name">Stay safe</div>
-          <div class="sub">Share itinerary; avoid isolated areas at night; use registered guides.</div>
-        </div></div>
-        <div class="item"><span class="icon">🚑</span><div>
-          <div class="name">Nearest emergency</div>
-          <div class="sub">Dial 112 (All-India), 108 (Ambulance). Keep hotel & local police numbers.</div>
-        </div></div>
-        <div class="item"><span class="icon">🚨</span><div>
-          <div class="name danger">Red spots</div>
-          <div class="sub">Check local advisories; avoid restricted border zones without permits.</div>
-        </div></div>
-        <div class="item"><span class="icon">📃</span><div>
-          <div class="name">Permits</div>
-          <div class="sub">Some regions require ILP/Permits (e.g., Arunachal, parts of Sikkim).</div>
-        </div></div>
-      </div>
     </aside>
 
     <main class="content">
@@ -118,6 +152,13 @@
           <div style="font-family:Poppins;font-weight:800;letter-spacing:.4px">Explore North-East Dashboard</div>
         </div>
         <div class="top-actions">
+          <div class="user-profile" id="userProfile" style="display: none;">
+            <img id="userPhoto" src="" alt="Profile" class="user-photo">
+            <div class="user-info">
+              <div class="user-name" id="userName"></div>
+              <div class="user-dob" id="userDob"></div>
+            </div>
+          </div>
           <button class="btn ghost" onclick="window.location.href='frontsheet.html'">Home</button>
           <button class="btn primary" onclick="window.location.href='after-login.html'">Profile</button>
         </div>
@@ -210,6 +251,176 @@
         </article>
       </section>
     </main>
+
+    <aside class="safety-panel" aria-label="Safety & Emergency Info">
+      <div class="brand" style="margin-bottom:15px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6l8-4z"/></svg>
+        <span>Safety Hub</span>
+      </div>
+
+      <div class="safety-section">
+        <h3>🚨 Red Zones & Restricted Areas</h3>
+        <div class="red-zone-item">
+          <div class="zone-name">Border Areas</div>
+          <div class="zone-desc">Arunachal Pradesh, Mizoram borders - Requires permits</div>
+        </div>
+        <div class="red-zone-item">
+          <div class="zone-name">Militant Areas</div>
+          <div class="zone-desc">Parts of Manipur, Nagaland - Avoid after dark</div>
+        </div>
+        <div class="red-zone-item">
+          <div class="zone-name">Restricted Monuments</div>
+          <div class="zone-desc">Some archaeological sites require special permission</div>
+        </div>
+      </div>
+
+      <div class="safety-section">
+        <h3>📞 Emergency Contacts</h3>
+        <div class="emergency-contact">
+          <div class="contact-name">All India Emergency</div>
+          <div class="contact-number">112</div>
+        </div>
+        <div class="emergency-contact">
+          <div class="contact-name">Ambulance</div>
+          <div class="contact-number">108</div>
+        </div>
+        <div class="emergency-contact">
+          <div class="contact-name">Tourist Helpline</div>
+          <div class="contact-number">1800-11-1363</div>
+        </div>
+        <div class="emergency-contact">
+          <div class="contact-name">Police Control</div>
+          <div class="contact-number">100</div>
+        </div>
+      </div>
+
+      <div class="safety-section">
+        <h3>🎯 Tourist Behavior Guidelines</h3>
+        <div class="info">
+          <div class="item">
+            <span class="icon">📸</span>
+            <div>
+              <div class="name">Photography</div>
+              <div class="sub">Ask permission before taking photos of locals</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="icon">👗</span>
+            <div>
+              <div class="name">Dress Code</div>
+              <div class="sub">Dress modestly in villages and religious sites</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="icon">🤝</span>
+            <div>
+              <div class="name">Respect</div>
+              <div class="sub">Respect local customs and traditions</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="icon">🌿</span>
+            <div>
+              <div class="name">Environment</div>
+              <div class="sub">Don't litter, especially in protected areas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="safety-section">
+        <h3>🏥 Health & Safety</h3>
+        <div class="info">
+          <div class="item">
+            <span class="icon">💊</span>
+            <div>
+              <div class="name">Medical Kit</div>
+              <div class="sub">Carry basic medicines and first aid</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="icon">💧</span>
+            <div>
+              <div class="name">Water Safety</div>
+              <div class="sub">Drink bottled or boiled water only</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="icon">🦟</span>
+            <div>
+              <div class="name">Mosquito Protection</div>
+              <div class="sub">Use repellent, especially in forest areas</div>
+            </div>
+          </div>
+          <div class="item">
+            <span class="icon">📱</span>
+            <div>
+              <div class="name">Communication</div>
+              <div class="sub">Keep phone charged, share location with family</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="safety-section">
+        <h3>🗺️ Interactive Maps</h3>
+        <button class="maps-btn" onclick="openMaps()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:8px;vertical-align:middle">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          View Safety Map
+        </button>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">
+          Shows red zones, restaurants, attractions & emergency services
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Emergency Chatbot Toggle Button -->
+  <button class="emergency-toggle" id="emergencyToggle" onclick="toggleEmergencyChat()" title="Emergency Assistant">
+    🚨
+  </button>
+
+  <!-- Emergency Chatbot Widget -->
+  <div class="emergency-chatbot" id="emergencyChat">
+    <div class="chatbot-header">
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>Emergency Assistant</span>
+      </div>
+      <button class="chatbot-close" onclick="toggleEmergencyChat()">×</button>
+    </div>
+    
+    <div class="chatbot-messages" id="chatMessages">
+      <div class="location-status" id="locationStatus">
+        📍 Getting your location...
+      </div>
+      <div class="message bot">
+        <div class="message-bubble">
+          Hello! I'm your emergency assistant. I can help you with:
+          <br>• Emergency alerts and SOS
+          <br>• Safety information
+          <br>• Location sharing
+          <br>• Voice commands
+          <br><br>
+          <strong>Say "HELP", "EMERGENCY", or "SOS" if you're in danger!</strong>
+        </div>
+        <div class="message-time" id="welcomeTime"></div>
+      </div>
+    </div>
+    
+    <div class="chatbot-input">
+      <div class="input-container">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message or use voice..." onkeypress="handleKeyPress(event)">
+        <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecording()" title="Voice Input">
+          🎤
+        </button>
+        <button class="send-btn" onclick="sendMessage()" title="Send Message">
+          ➤
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -226,6 +437,342 @@
       localStorage.removeItem('isLoggedIn');
       window.location.href = 'frontsheet.html';
     }
+    
+    function openMaps(){
+      // Open the geo-fencing map page
+      window.location.href = 'geofence.html';
+    }
+
+    // Load user profile information
+    async function loadUserProfile() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const userProfile = document.getElementById('userProfile');
+      const userPhoto = document.getElementById('userPhoto');
+      const userName = document.getElementById('userName');
+      const userDob = document.getElementById('userDob');
+
+      // Show basic user info from registration/login
+      if (user.username) {
+        userName.textContent = user.username;
+        userDob.textContent = `Email: ${user.email}`;
+        
+        // Default avatar
+        userPhoto.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iMjAiIGZpbGw9IiNmMGY4ZmYiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNzNlNiI+CjxwYXRoIGQ9Ik0xMiAxMmMyLjIxIDAgNC0xLjc5IDQtNHMtMS43OS00LTQtNC00IDEuNzktNCA0IDEuNzkgNCA0IDR6bTAgMmMtMi42NyAwLTggMS4zNC04IDR2MmgxNnYtMmMwLTIuNjYtNS4zMy00LTgtNHoiLz4KPC9zdmc+Cjwvc3ZnPg==';
+        
+        userProfile.style.display = 'flex';
+      }
+
+      // Try to load detailed profile if available
+      if (user.blockchainId) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/user/${user.blockchainId}`);
+          const data = await response.json();
+          
+          if (data.success && data.user.profile_completed) {
+            // Decrypt and parse profile data
+            const profileData = JSON.parse(data.user.encrypted_data);
+            
+            if (profileData.personalInfo) {
+              userName.textContent = profileData.personalInfo.fullName || user.username;
+              
+              if (profileData.personalInfo.dateOfBirth) {
+                const dob = new Date(profileData.personalInfo.dateOfBirth);
+                userDob.textContent = `Born: ${dob.toLocaleDateString()}`;
+              }
+              
+              if (profileData.personalInfo.photo) {
+                userPhoto.src = profileData.personalInfo.photo;
+              }
+            }
+          }
+        } catch (error) {
+          console.log('Profile loading failed:', error);
+        }
+      }
+    }
+
+    // Load profile on page load
+    window.addEventListener('load', loadUserProfile);
+
+    // Emergency Chatbot Functionality
+    let isRecording = false;
+    let recognition = null;
+    let currentLocation = null;
+    let emergencyKeywords = ['help', 'emergency', 'sos', 'danger', 'attack', 'fire', 'accident', 'injured', 'lost', 'trapped', 'robbery', 'assault'];
+
+    // Initialize chatbot
+    function initEmergencyChat() {
+      // Set welcome message time
+      document.getElementById('welcomeTime').textContent = new Date().toLocaleTimeString();
+      
+      // Initialize location tracking
+      startLocationTracking();
+      
+      // Initialize speech recognition
+      initSpeechRecognition();
+    }
+
+    // Toggle chatbot visibility
+    function toggleEmergencyChat() {
+      const chat = document.getElementById('emergencyChat');
+      const toggle = document.getElementById('emergencyToggle');
+      
+      if (chat.style.display === 'none' || chat.style.display === '') {
+        chat.style.display = 'flex';
+        toggle.classList.add('active');
+        toggle.textContent = '✓';
+      } else {
+        chat.style.display = 'none';
+        toggle.classList.remove('active');
+        toggle.textContent = '🚨';
+      }
+    }
+
+    // Initialize speech recognition
+    function initSpeechRecognition() {
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = function() {
+          isRecording = true;
+          document.getElementById('voiceBtn').classList.add('recording');
+          addBotMessage('🎤 Listening... Speak now!');
+        };
+
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          document.getElementById('chatInput').value = transcript;
+          addUserMessage(transcript, true); // true indicates voice message
+          processMessage(transcript);
+        };
+
+        recognition.onerror = function(event) {
+          addBotMessage('❌ Voice recognition error. Please try typing instead.');
+        };
+
+        recognition.onend = function() {
+          isRecording = false;
+          document.getElementById('voiceBtn').classList.remove('recording');
+        };
+      } else {
+        console.log('Speech recognition not supported');
+        document.getElementById('voiceBtn').style.display = 'none';
+      }
+    }
+
+    // Toggle voice recording
+    function toggleVoiceRecording() {
+      if (!recognition) {
+        addBotMessage('❌ Voice recognition not supported in your browser.');
+        return;
+      }
+
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
+
+    // Handle keyboard input
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    // Send message
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      
+      if (message) {
+        addUserMessage(message);
+        processMessage(message);
+        input.value = '';
+      }
+    }
+
+    // Add user message to chat
+    function addUserMessage(message, isVoice = false) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message user';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.innerHTML = (isVoice ? '🎤 ' : '') + message;
+      
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = new Date().toLocaleTimeString();
+      
+      messageDiv.appendChild(bubble);
+      messageDiv.appendChild(time);
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Add bot message to chat
+    function addBotMessage(message, isEmergency = false) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = isEmergency ? 'message bot emergency' : 'message bot';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.innerHTML = message;
+      
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = new Date().toLocaleTimeString();
+      
+      messageDiv.appendChild(bubble);
+      messageDiv.appendChild(time);
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Process incoming message
+    function processMessage(message) {
+      const lowerMessage = message.toLowerCase();
+      
+      // Check for emergency keywords
+      const isEmergency = emergencyKeywords.some(keyword => lowerMessage.includes(keyword));
+      
+      if (isEmergency) {
+        handleEmergencyAlert(message);
+      } else {
+        // Handle regular queries
+        handleRegularQuery(message);
+      }
+    }
+
+    // Handle emergency alert
+    async function handleEmergencyAlert(message) {
+      // Show danger detected alert
+      showDangerAlert();
+      
+      // Send emergency response
+      addBotMessage('🚨 <strong>EMERGENCY DETECTED!</strong><br><br>Your alert has been sent to authorities with your location.<br><br>📍 Location: ' + (currentLocation ? \`\${currentLocation.lat.toFixed(4)}, \${currentLocation.lng.toFixed(4)}\` : 'Getting location...') + '<br><br>Stay calm. Help is on the way!', true);
+      
+      // Send alert to authorities
+      await sendEmergencyAlert(message);
+      
+      // Auto-dial emergency if possible (requires user interaction)
+      addBotMessage('📞 <strong>Emergency Contacts:</strong><br>• All India Emergency: 112<br>• Police: 100<br>• Ambulance: 108<br><br><a href="tel:112" style="color: #fff; text-decoration: underline;">Click to call 112</a>');
+    }
+
+    // Show danger alert banner
+    function showDangerAlert() {
+      const messagesContainer = document.getElementById('chatMessages');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'danger-detected';
+      alertDiv.innerHTML = '⚠️ <strong>DANGER DETECTED</strong><br>Emergency alert sent to authorities!';
+      messagesContainer.appendChild(alertDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Handle regular queries
+    function handleRegularQuery(message) {
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage.includes('location') || lowerMessage.includes('where')) {
+        if (currentLocation) {
+          addBotMessage(\`📍 Your current location:<br>Latitude: \${currentLocation.lat.toFixed(6)}<br>Longitude: \${currentLocation.lng.toFixed(6)}<br><br><a href="https://maps.google.com/?q=\${currentLocation.lat},\${currentLocation.lng}" target="_blank" style="color: #15a4ff;">View on Google Maps</a>\`);
+        } else {
+          addBotMessage('📍 Getting your location... Please wait.');
+        }
+      } else if (lowerMessage.includes('safety') || lowerMessage.includes('tips')) {
+        addBotMessage('🛡️ <strong>Safety Tips:</strong><br>• Share your location with family<br>• Stay in well-lit areas<br>• Keep emergency contacts handy<br>• Trust your instincts<br>• Avoid isolated areas at night');
+      } else if (lowerMessage.includes('contact') || lowerMessage.includes('number')) {
+        addBotMessage('📞 <strong>Emergency Contacts:</strong><br>• All India Emergency: 112<br>• Police: 100<br>• Ambulance: 108<br>• Tourist Helpline: 1800-11-1363');
+      } else {
+        addBotMessage('I understand you need help. For emergencies, say "HELP", "SOS", or "EMERGENCY". For other queries, I can help with location, safety tips, or emergency contacts.');
+      }
+    }
+
+    // Start location tracking
+    function startLocationTracking() {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            currentLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              accuracy: position.coords.accuracy
+            };
+            
+            document.getElementById('locationStatus').innerHTML = \`📍 Location active (±\${Math.round(currentLocation.accuracy)}m accuracy)\`;
+            
+            // Start continuous tracking
+            navigator.geolocation.watchPosition(
+              function(position) {
+                currentLocation = {
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                  accuracy: position.coords.accuracy
+                };
+              },
+              function(error) {
+                console.log('Location tracking error:', error);
+              },
+              { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+            );
+          },
+          function(error) {
+            document.getElementById('locationStatus').innerHTML = '📍 Location access denied. Please enable location services.';
+            console.log('Geolocation error:', error);
+          },
+          { enableHighAccuracy: true, maximumAge: 60000, timeout: 10000 }
+        );
+      } else {
+        document.getElementById('locationStatus').innerHTML = '📍 Location services not supported.';
+      }
+    }
+
+    // Send emergency alert to authorities
+    async function sendEmergencyAlert(message) {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        const alertData = {
+          touristId: user.id,
+          touristName: user.username,
+          blockchainId: user.blockchainId,
+          message: message,
+          location: currentLocation,
+          timestamp: new Date().toISOString(),
+          type: 'emergency',
+          status: 'active'
+        };
+
+        const response = await fetch('http://localhost:3000/api/emergency-alert', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(alertData)
+        });
+
+        if (response.ok) {
+          console.log('Emergency alert sent successfully');
+        } else {
+          console.error('Failed to send emergency alert');
+        }
+      } catch (error) {
+        console.error('Error sending emergency alert:', error);
+      }
+    }
+
+    // Initialize chatbot when page loads
+    window.addEventListener('load', function() {
+      initEmergencyChat();
+    });
   </script>
 </body>
 </html>
+
