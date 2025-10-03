@@ -73,6 +73,31 @@ db.serialize(() => {
     notes TEXT,
     FOREIGN KEY (tourist_id) REFERENCES users(id)
   )`);
+
+  // Create authority users table (for authority dashboard login)
+  db.run(`CREATE TABLE IF NOT EXISTS authority_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  // Seed a default authority user if none exists
+  db.get('SELECT COUNT(*) as count FROM authority_users', async (err, row) => {
+    if (!err && row && row.count === 0) {
+      try {
+        const defaultEmail = process.env.AUTHORITY_EMAIL || 'authority@example.com';
+        const defaultName = process.env.AUTHORITY_NAME || 'Control Room';
+        const defaultPass = process.env.AUTHORITY_PASSWORD || 'Authority@123';
+        const hashed = await bcrypt.hash(defaultPass, 10);
+        db.run('INSERT INTO authority_users (name, email, password) VALUES (?, ?, ?)', [defaultName, defaultEmail, hashed]);
+        console.log(`Seeded default authority user: ${defaultEmail} / (password hidden)`);
+      } catch (e) {
+        console.log('Failed to seed default authority user');
+      }
+    }
+  });
 });
 
 // WebSocket connection handling
@@ -792,6 +817,37 @@ app.delete('/api/admin/clear', (req, res) => {
 // Serve static files
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontsheet.html'));
+});
+
+// Authority login endpoint
+app.post('/api/authority/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    }
+
+    db.get('SELECT * FROM authority_users WHERE email = ?', [email], async (err, user) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      if (!user) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+
+      return res.json({
+        success: true,
+        user: { id: user.id, name: user.name, email: user.email, role: 'authority' }
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 });
 
 // Start server with WebSocket support

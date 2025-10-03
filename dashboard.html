@@ -424,355 +424,192 @@
   </div>
 
   <script>
-    // Manual navigation; no auto-redirects
     const sidebar = document.getElementById('sidebar');
     const hamburger = document.getElementById('hamburger');
+  
     function toggleSidebar(){ sidebar.classList.toggle('open'); }
     if (hamburger){
       hamburger.addEventListener('click', toggleSidebar);
-      hamburger.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleSidebar(); }});
+      hamburger.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleSidebar(); }});
     }
+  
     function logout(){
       localStorage.removeItem('user');
       localStorage.removeItem('isLoggedIn');
-      window.location.href = 'frontsheet.html';
+      window.location.href='frontsheet.html';
     }
-    
+  
     function openMaps(){
-      // Open the geo-fencing map page
-      window.location.href = 'geofence.html';
+      window.location.href='geofence.html';
     }
-
-    // Load user profile information
+  
+    // Load user profile
     async function loadUserProfile() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const userProfile = document.getElementById('userProfile');
       const userPhoto = document.getElementById('userPhoto');
       const userName = document.getElementById('userName');
       const userDob = document.getElementById('userDob');
-
-      // Show basic user info from registration/login
-      if (user.username) {
-        userName.textContent = user.username;
-        userDob.textContent = `Email: ${user.email}`;
-        
-        // Default avatar
-        userPhoto.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iMjAiIGZpbGw9IiNmMGY4ZmYiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNzNlNiI+CjxwYXRoIGQ9Ik0xMiAxMmMyLjIxIDAgNC0xLjc5IDQtNHMtMS43OS00LTQtNC00IDEuNzktNCA0IDEuNzkgNCA0IDR6bTAgMmMtMi42NyAwLTggMS4zNC04IDR2MmgxNnYtMmMwLTIuNjYtNS4zMy00LTgtNHoiLz4KPC9zdmc+Cjwvc3ZnPg==';
-        
-        userProfile.style.display = 'flex';
-      }
-
-      // Try to load detailed profile if available
-      if (user.blockchainId) {
-        try {
-          const response = await fetch(`http://localhost:3000/api/user/${user.blockchainId}`);
-          const data = await response.json();
-          
-          if (data.success && data.user.profile_completed) {
-            // Decrypt and parse profile data
-            const profileData = JSON.parse(data.user.encrypted_data);
-            
-            if (profileData.personalInfo) {
-              userName.textContent = profileData.personalInfo.fullName || user.username;
-              
-              if (profileData.personalInfo.dateOfBirth) {
-                const dob = new Date(profileData.personalInfo.dateOfBirth);
-                userDob.textContent = `Born: ${dob.toLocaleDateString()}`;
-              }
-              
-              if (profileData.personalInfo.photo) {
-                userPhoto.src = profileData.personalInfo.photo;
-              }
-            }
-          }
-        } catch (error) {
-          console.log('Profile loading failed:', error);
-        }
+  
+      if(user.username){
+        userName.textContent=user.username;
+        userDob.textContent=`Email: ${user.email}`;
+        userPhoto.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iMjAiIGZpbGw9IiNmMGY4ZmYiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNzNlNiI+CjxwYXRoIGQ9Ik0xMiAxMmMyLjIxIDAgNC0xLjc5IDQtNHMtMS43OS00LTQtNC00IDEuNzktNCA0IDEuNzkgNCA0IDR6bTAgMmMtMi42NyAwLTggMS4zNC04IDR2MmgxNnYtMmMwLTIuNjYtNS4zMy00LTgtNHoiLz4KPC9zdmc+Cjwvc3ZnPg==';
+        userProfile.style.display='flex';
       }
     }
-
-    // Load profile on page load
     window.addEventListener('load', loadUserProfile);
-
-    // Emergency Chatbot Functionality
-    let isRecording = false;
-    let recognition = null;
-    let currentLocation = null;
-    let emergencyKeywords = ['help', 'emergency', 'sos', 'danger', 'attack', 'fire', 'accident', 'injured', 'lost', 'trapped', 'robbery', 'assault'];
-
-    // Initialize chatbot
-    function initEmergencyChat() {
-      // Set welcome message time
-      document.getElementById('welcomeTime').textContent = new Date().toLocaleTimeString();
-      
-      // Initialize location tracking
-      startLocationTracking();
-      
-      // Initialize speech recognition
-      initSpeechRecognition();
-    }
-
-    // Toggle chatbot visibility
-    function toggleEmergencyChat() {
-      const chat = document.getElementById('emergencyChat');
-      const toggle = document.getElementById('emergencyToggle');
-      
-      if (chat.style.display === 'none' || chat.style.display === '') {
-        chat.style.display = 'flex';
-        toggle.classList.add('active');
-        toggle.textContent = '✓';
-      } else {
-        chat.style.display = 'none';
-        toggle.classList.remove('active');
-        toggle.textContent = '🚨';
+  
+    // ----------------- Emergency Chatbot -----------------
+    const chat = document.getElementById('emergencyChat');
+    const toggleBtn = document.getElementById('emergencyToggle');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const voiceBtn = document.getElementById('voiceBtn');
+    let recognition=null;
+    let isRecording=false;
+    let currentLocation=null;
+    const emergencyKeywords=['help','emergency','sos','danger','attack','fire','accident','injured','lost','trapped','robbery','assault'];
+  
+    function toggleEmergencyChat(){
+      if(chat.style.display==='flex'){
+        chat.style.display='none';
+        toggleBtn.classList.remove('active');
+        toggleBtn.textContent='🚨';
+      }else{
+        chat.style.display='flex';
+        toggleBtn.classList.add('active');
+        toggleBtn.textContent='✓';
       }
     }
-
-    // Initialize speech recognition
-    function initSpeechRecognition() {
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
-
-        recognition.onstart = function() {
-          isRecording = true;
-          document.getElementById('voiceBtn').classList.add('recording');
-          addBotMessage('🎤 Listening... Speak now!');
-        };
-
-        recognition.onresult = function(event) {
-          const transcript = event.results[0][0].transcript;
-          document.getElementById('chatInput').value = transcript;
-          addUserMessage(transcript, true); // true indicates voice message
-          processMessage(transcript);
-        };
-
-        recognition.onerror = function(event) {
-          addBotMessage('❌ Voice recognition error. Please try typing instead.');
-        };
-
-        recognition.onend = function() {
-          isRecording = false;
-          document.getElementById('voiceBtn').classList.remove('recording');
-        };
-      } else {
-        console.log('Speech recognition not supported');
-        document.getElementById('voiceBtn').style.display = 'none';
-      }
+  
+    function addMessage(msg, sender='bot', emergency=false){
+      const msgDiv=document.createElement('div');
+      msgDiv.className=`message ${sender}${emergency?' emergency':''}`;
+      const bubble=document.createElement('div');
+      bubble.className='message-bubble';
+      bubble.innerHTML=msg;
+      const time=document.createElement('div');
+      time.className='message-time';
+      time.textContent=new Date().toLocaleTimeString();
+      msgDiv.appendChild(bubble);
+      msgDiv.appendChild(time);
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop=chatMessages.scrollHeight;
     }
-
-    // Toggle voice recording
-    function toggleVoiceRecording() {
-      if (!recognition) {
-        addBotMessage('❌ Voice recognition not supported in your browser.');
-        return;
-      }
-
-      if (isRecording) {
-        recognition.stop();
-      } else {
-        recognition.start();
-      }
+  
+    function sendMessage(){
+      const msg=chatInput.value.trim();
+      if(!msg) return;
+      addMessage(msg,'user');
+      processMessage(msg);
+      chatInput.value='';
     }
-
-    // Handle keyboard input
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
+  
+    function handleKeyPress(e){
+      if(e.key==='Enter') sendMessage();
     }
-
-    // Send message
-    function sendMessage() {
-      const input = document.getElementById('chatInput');
-      const message = input.value.trim();
-      
-      if (message) {
-        addUserMessage(message);
-        processMessage(message);
-        input.value = '';
-      }
+  
+    function toggleVoiceRecording(){
+      if(!recognition){ addMessage('❌ Voice recognition not supported.'); return; }
+      if(isRecording) recognition.stop(); else recognition.start();
     }
-
-    // Add user message to chat
-    function addUserMessage(message, isVoice = false) {
-      const messagesContainer = document.getElementById('chatMessages');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message user';
-      
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-      bubble.innerHTML = (isVoice ? '🎤 ' : '') + message;
-      
-      const time = document.createElement('div');
-      time.className = 'message-time';
-      time.textContent = new Date().toLocaleTimeString();
-      
-      messageDiv.appendChild(bubble);
-      messageDiv.appendChild(time);
-      messagesContainer.appendChild(messageDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+    function initSpeechRecognition(){
+      if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { voiceBtn.style.display='none'; return; }
+      recognition=new (window.SpeechRecognition||window.webkitSpeechRecognition)();
+      recognition.continuous=false;
+      recognition.interimResults=false;
+      recognition.lang='en-US';
+      recognition.onstart=()=>{isRecording=true;voiceBtn.classList.add('recording'); addMessage('🎤 Listening...','bot');};
+      recognition.onresult=e=>{
+        const transcript=e.results[0][0].transcript;
+        chatInput.value=transcript;
+        addMessage(transcript,'user',true);
+        processMessage(transcript);
+      };
+      recognition.onerror=e=>{ addMessage('❌ Voice recognition error.'); };
+      recognition.onend=()=>{isRecording=false;voiceBtn.classList.remove('recording');};
     }
-
-    // Add bot message to chat
-    function addBotMessage(message, isEmergency = false) {
-      const messagesContainer = document.getElementById('chatMessages');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = isEmergency ? 'message bot emergency' : 'message bot';
-      
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-      bubble.innerHTML = message;
-      
-      const time = document.createElement('div');
-      time.className = 'message-time';
-      time.textContent = new Date().toLocaleTimeString();
-      
-      messageDiv.appendChild(bubble);
-      messageDiv.appendChild(time);
-      messagesContainer.appendChild(messageDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+    function processMessage(message){
+      const lower=message.toLowerCase();
+      const isEmergency=emergencyKeywords.some(k=>lower.includes(k));
+      if(isEmergency) handleEmergency(message);
+      else handleQuery(lower);
     }
-
-    // Process incoming message
-    function processMessage(message) {
-      const lowerMessage = message.toLowerCase();
-      
-      // Check for emergency keywords
-      const isEmergency = emergencyKeywords.some(keyword => lowerMessage.includes(keyword));
-      
-      if (isEmergency) {
-        handleEmergencyAlert(message);
-      } else {
-        // Handle regular queries
-        handleRegularQuery(message);
-      }
-    }
-
-    // Handle emergency alert
-    async function handleEmergencyAlert(message) {
-      // Show danger detected alert
+  
+    function handleEmergency(msg){
+      addMessage('🚨 <strong>EMERGENCY DETECTED!</strong> Authorities notified.<br>📍 Location: '+(currentLocation?`${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}`:'Getting location...'),'bot',true);
+      addMessage('📞 Emergency contacts:<br>• All India Emergency: 112<br>• Police: 100<br>• Ambulance: 108<br>• Tourist Helpline: 1800-11-1363','bot');
       showDangerAlert();
-      
-      // Send emergency response
-      addBotMessage('🚨 <strong>EMERGENCY DETECTED!</strong><br><br>Your alert has been sent to authorities with your location.<br><br>📍 Location: ' + (currentLocation ? \`\${currentLocation.lat.toFixed(4)}, \${currentLocation.lng.toFixed(4)}\` : 'Getting location...') + '<br><br>Stay calm. Help is on the way!', true);
-      
-      // Send alert to authorities
-      await sendEmergencyAlert(message);
-      
-      // Auto-dial emergency if possible (requires user interaction)
-      addBotMessage('📞 <strong>Emergency Contacts:</strong><br>• All India Emergency: 112<br>• Police: 100<br>• Ambulance: 108<br><br><a href="tel:112" style="color: #fff; text-decoration: underline;">Click to call 112</a>');
+      sendEmergencyAlert(msg);
     }
-
-    // Show danger alert banner
-    function showDangerAlert() {
-      const messagesContainer = document.getElementById('chatMessages');
-      const alertDiv = document.createElement('div');
-      alertDiv.className = 'danger-detected';
-      alertDiv.innerHTML = '⚠️ <strong>DANGER DETECTED</strong><br>Emergency alert sent to authorities!';
-      messagesContainer.appendChild(alertDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+    function showDangerAlert(){
+      const alertDiv=document.createElement('div');
+      alertDiv.className='danger-detected';
+      alertDiv.innerHTML='⚠️ <strong>DANGER DETECTED</strong><br>Authorities alerted!';
+      chatMessages.appendChild(alertDiv);
+      chatMessages.scrollTop=chatMessages.scrollHeight;
     }
-
-    // Handle regular queries
-    function handleRegularQuery(message) {
-      const lowerMessage = message.toLowerCase();
-      
-      if (lowerMessage.includes('location') || lowerMessage.includes('where')) {
-        if (currentLocation) {
-          addBotMessage(\`📍 Your current location:<br>Latitude: \${currentLocation.lat.toFixed(6)}<br>Longitude: \${currentLocation.lng.toFixed(6)}<br><br><a href="https://maps.google.com/?q=\${currentLocation.lat},\${currentLocation.lng}" target="_blank" style="color: #15a4ff;">View on Google Maps</a>\`);
-        } else {
-          addBotMessage('📍 Getting your location... Please wait.');
-        }
-      } else if (lowerMessage.includes('safety') || lowerMessage.includes('tips')) {
-        addBotMessage('🛡️ <strong>Safety Tips:</strong><br>• Share your location with family<br>• Stay in well-lit areas<br>• Keep emergency contacts handy<br>• Trust your instincts<br>• Avoid isolated areas at night');
-      } else if (lowerMessage.includes('contact') || lowerMessage.includes('number')) {
-        addBotMessage('📞 <strong>Emergency Contacts:</strong><br>• All India Emergency: 112<br>• Police: 100<br>• Ambulance: 108<br>• Tourist Helpline: 1800-11-1363');
-      } else {
-        addBotMessage('I understand you need help. For emergencies, say "HELP", "SOS", or "EMERGENCY". For other queries, I can help with location, safety tips, or emergency contacts.');
+  
+    function handleQuery(msg){
+      if(msg.includes('location')){
+        if(currentLocation){
+          addMessage(`📍 Your current location:<br>Latitude: ${currentLocation.lat.toFixed(6)}<br>Longitude: ${currentLocation.lng.toFixed(6)}<br><a href="https://maps.google.com/?q=${currentLocation.lat},${currentLocation.lng}" target="_blank">View on Google Maps</a>`);
+        } else addMessage('📍 Getting your location...');
+      } else if(msg.includes('safety')||msg.includes('tips')){
+        addMessage('🛡️ Safety Tips:<br>• Share location<br>• Stay in well-lit areas<br>• Keep contacts handy<br>• Trust instincts<br>• Avoid isolated areas at night');
+      } else if(msg.includes('contact')||msg.includes('number')){
+        addMessage('📞 Emergency Contacts:<br>• All India Emergency: 112<br>• Police: 100<br>• Ambulance: 108<br>• Tourist Helpline: 1800-11-1363');
+      } else addMessage('I can help with location, safety tips, or emergency alerts. Say "HELP", "SOS", or "EMERGENCY" if in danger!');
+    }
+  
+    function startLocationTracking(){
+      if(!('geolocation' in navigator)) { 
+        document.getElementById('locationStatus').textContent='📍 Location not supported.'; 
+        return; 
       }
+      navigator.geolocation.getCurrentPosition(pos=>{
+        currentLocation={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy};
+        document.getElementById('locationStatus').textContent=`📍 Location active (±${Math.round(currentLocation.accuracy)}m)`;
+      },err=>{
+        document.getElementById('locationStatus').textContent='📍 Location access denied.';
+      },{enableHighAccuracy:true});
+  
+      navigator.geolocation.watchPosition(pos=>{
+        currentLocation={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy};
+      },err=>{console.log('Location error:',err);},{enableHighAccuracy:true,maximumAge:30000,timeout:10000});
     }
-
-    // Start location tracking
-    function startLocationTracking() {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          function(position) {
-            currentLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              accuracy: position.coords.accuracy
-            };
-            
-            document.getElementById('locationStatus').innerHTML = \`📍 Location active (±\${Math.round(currentLocation.accuracy)}m accuracy)\`;
-            
-            // Start continuous tracking
-            navigator.geolocation.watchPosition(
-              function(position) {
-                currentLocation = {
-                  lat: position.coords.latitude,
-                  lng: position.coords.longitude,
-                  accuracy: position.coords.accuracy
-                };
-              },
-              function(error) {
-                console.log('Location tracking error:', error);
-              },
-              { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
-            );
-          },
-          function(error) {
-            document.getElementById('locationStatus').innerHTML = '📍 Location access denied. Please enable location services.';
-            console.log('Geolocation error:', error);
-          },
-          { enableHighAccuracy: true, maximumAge: 60000, timeout: 10000 }
-        );
-      } else {
-        document.getElementById('locationStatus').innerHTML = '📍 Location services not supported.';
-      }
-    }
-
-    // Send emergency alert to authorities
-    async function sendEmergencyAlert(message) {
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        
-        const alertData = {
-          touristId: user.id,
-          touristName: user.username,
-          blockchainId: user.blockchainId,
-          message: message,
-          location: currentLocation,
-          timestamp: new Date().toISOString(),
-          type: 'emergency',
-          status: 'active'
+  
+    async function sendEmergencyAlert(msg){
+      try{
+        const user=JSON.parse(localStorage.getItem('user')||'{}');
+        const alertData={
+          touristId:user.id,
+          touristName:user.username,
+          blockchainId:user.blockchainId,
+          message:msg,
+          location:currentLocation,
+          timestamp:new Date().toISOString(),
+          type:'emergency',
+          status:'active'
         };
-
-        const response = await fetch('http://localhost:3000/api/emergency-alert', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(alertData)
+        await fetch('http://localhost:3000/api/emergency-alert',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(alertData)
         });
-
-        if (response.ok) {
-          console.log('Emergency alert sent successfully');
-        } else {
-          console.error('Failed to send emergency alert');
-        }
-      } catch (error) {
-        console.error('Error sending emergency alert:', error);
-      }
+      }catch(e){console.error('Emergency alert failed:',e);}
     }
-
-    // Initialize chatbot when page loads
-    window.addEventListener('load', function() {
-      initEmergencyChat();
+  
+    window.addEventListener('load',()=>{
+      initSpeechRecognition();
+      startLocationTracking();
     });
   </script>
+  
 </body>
 </html>
 

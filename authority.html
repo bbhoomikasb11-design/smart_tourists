@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Emergency Authority Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-  <style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+
     :root{
       --bg:#1a1a2e;
       --bg2:#16213e;
@@ -209,266 +212,251 @@
     </aside>
   </div>
 
-  <script>
-    // Global variables
-    let tourists = [];
-    let alerts = [];
-    let wsConnection = null;
+<script>
+  // Global variables
+  let tourists = [];
+  let alerts = [];
+  let wsConnection = null;
+  let map, touristMarkers = {};
 
-    // Initialize dashboard
-    function initDashboard() {
-      loadTourists();
-      loadAlerts();
-      connectWebSocket();
-      updateStatistics();
-      
-      // Auto-refresh every 30 seconds
-      setInterval(() => {
+  // Initialize dashboard
+  function initDashboard() {
+    initMap();
+    loadTourists();
+    loadAlerts();
+    connectWebSocket();
+    updateStatistics();
+
+    // Auto-refresh every 30 seconds if WebSocket fails
+    setInterval(() => {
+      if (!wsConnection || wsConnection.readyState !== WebSocket.OPEN) {
         loadTourists();
         loadAlerts();
-        updateStatistics();
-      }, 30000);
+      }
+      updateStatistics();
+    }, 30000);
+  }
+
+  // Initialize Leaflet map
+  function initMap() {
+    map = L.map('trackingMap').setView([25.5788, 91.8933], 6); // Center NE India
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+  }
+
+  // Load tourists data
+  async function loadTourists() {
+    try {
+      const response = await fetch('http://localhost:3000/api/admin/users');
+      const data = await response.json();
+      if (data.success) {
+        tourists = data.users;
+        renderTourists();
+        updateMapMarkers();
+      }
+    } catch (error) {
+      console.error('Error loading tourists:', error);
+      showDemoTourists();
+    }
+  }
+
+  // Render tourists cards
+  function renderTourists() {
+    const grid = document.getElementById('touristGrid');
+    if (!tourists.length) {
+      grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">No active tourists found</div>';
+      return;
     }
 
-    // Load tourists data
-    async function loadTourists() {
-      try {
-        const response = await fetch('http://localhost:3000/api/admin/users');
-        const data = await response.json();
-        
-        if (data.success) {
-          tourists = data.users;
-          renderTourists();
-        }
-      } catch (error) {
-        console.error('Error loading tourists:', error);
-      }
-    }
-
-    // Render tourists grid
-    function renderTourists() {
-      const grid = document.getElementById('touristGrid');
-      
-      if (tourists.length === 0) {
-        grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">No active tourists found</div>';
-        return;
-      }
-
-      grid.innerHTML = tourists.map(tourist => {
-        const status = getRandomStatus(); // In real app, this would come from live data
-        const location = getRandomLocation(); // In real app, this would come from GPS
-        
-        return `
-          <div class="tourist-card">
-            <div class="tourist-header">
-              <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iMjAiIGZpbGw9IiNmMGY4ZmYiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNzNlNiI+CjxwYXRoIGQ9Ik0xMiAxMmMyLjIxIDAgNC0xLjc5IDQtNHMtMS43OS00LTQtNC00IDEuNzktNCA0IDEuNzkgNCA0IDR6bTAgMmMtMi42NyAwLTggMS4zNC04IDR2MmgxNnYtMmMwLTIuNjYtNS4zMy00LTgtNHoiLz4KPC9zdmc+Cjwvc3ZnPg==" alt="Tourist" class="tourist-photo">
-              <div class="tourist-info">
-                <h4>${tourist.username}</h4>
-                <p>ID: ${tourist.blockchain_id || 'N/A'}</p>
-              </div>
-            </div>
-            <div class="tourist-status status-${status.class}">${status.text}</div>
-            <div class="tourist-location">
-              📍 <a href="https://maps.google.com/?q=${location.lat},${location.lng}" target="_blank" class="location-link">
-                ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}
-              </a>
-            </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:8px">
-              Last seen: ${new Date().toLocaleTimeString()}
+    grid.innerHTML = tourists.map(tourist => {
+      const status = getTouristStatus(tourist);
+      const location = tourist.location || getRandomLocation();
+      return `
+        <div class="tourist-card">
+          <div class="tourist-header">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAi..." class="tourist-photo">
+            <div class="tourist-info">
+              <h4>${tourist.username}</h4>
+              <p>ID: ${tourist.blockchain_id || 'N/A'}</p>
             </div>
           </div>
-        `;
-      }).join('');
-    }
-
-    // Load emergency alerts
-    async function loadAlerts() {
-      try {
-        const response = await fetch('http://localhost:3000/api/emergency-alerts');
-        const data = await response.json();
-        
-        if (data.success) {
-          alerts = data.alerts || [];
-          renderAlerts();
-        }
-      } catch (error) {
-        console.error('Error loading alerts:', error);
-        // Show demo alerts if backend is not available
-        showDemoAlerts();
-      }
-    }
-
-    // Render alerts panel
-    function renderAlerts() {
-      const alertsList = document.getElementById('alertsList');
-      
-      if (alerts.length === 0) {
-        alertsList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:14px">No active alerts</div>';
-        return;
-      }
-
-      alertsList.innerHTML = alerts.map(alert => `
-        <div class="alert-item ${alert.type === 'emergency' ? 'urgent' : ''}">
-          <div class="alert-header">
-            <span class="alert-type">${alert.type}</span>
-            <span class="alert-time">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+          <div class="tourist-status status-${status.class}">${status.text}</div>
+          <div class="tourist-location">
+            📍 <a href="https://maps.google.com/?q=${location.lat},${location.lng}" target="_blank" class="location-link">
+              ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}
+            </a>
           </div>
-          <div class="alert-tourist">${alert.touristName} (ID: ${alert.blockchainId})</div>
-          <div class="alert-message">${alert.message}</div>
-          <div class="alert-location">
-            📍 Location: ${alert.location ? `${alert.location.lat.toFixed(4)}, ${alert.location.lng.toFixed(4)}` : 'Unknown'}
-          </div>
-          <div class="alert-actions">
-            <button class="alert-btn btn-respond" onclick="respondToAlert('${alert.id}')">Respond</button>
-            <button class="alert-btn btn-track" onclick="trackTourist('${alert.touristId}')">Track</button>
-            <button class="alert-btn btn-dismiss" onclick="dismissAlert('${alert.id}')">Dismiss</button>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px">
+            Last seen: ${new Date().toLocaleTimeString()}
           </div>
         </div>
-      `).join('');
-    }
+      `;
+    }).join('');
+  }
 
-    // Show demo alerts when backend is not available
-    function showDemoAlerts() {
-      const demoAlerts = [
-        {
-          id: 'demo1',
-          type: 'emergency',
-          touristName: 'Demo Tourist',
-          blockchainId: 'DEMO123',
-          message: 'HELP! I am lost in the forest near Shillong. Cannot find the way back.',
-          location: { lat: 25.5788, lng: 91.8933 },
-          timestamp: new Date().toISOString()
-        },
-        {
-          id: 'demo2',
-          type: 'emergency',
-          touristName: 'Test User',
-          blockchainId: 'TEST456',
-          message: 'Emergency! Car accident on highway. Need immediate help.',
-          location: { lat: 26.1445, lng: 91.7362 },
-          timestamp: new Date(Date.now() - 300000).toISOString()
-        }
-      ];
-      
-      alerts = demoAlerts;
-      renderAlerts();
-    }
-
-    // Update statistics
-    function updateStatistics() {
-      document.getElementById('activeTourists').textContent = tourists.length;
-      document.getElementById('emergencyAlerts').textContent = alerts.filter(a => a.type === 'emergency').length;
-      document.getElementById('resolvedToday').textContent = Math.floor(Math.random() * 10);
-      document.getElementById('responseTime').textContent = '2.3 min';
-    }
-
-    // Alert actions
-    function respondToAlert(alertId) {
-      alert(`Dispatching emergency response team for alert ${alertId}`);
-      // In real app, this would trigger emergency response protocols
-    }
-
-    function trackTourist(touristId) {
-      alert(`Opening live tracking for tourist ${touristId}`);
-      // In real app, this would open detailed tracking view
-    }
-
-    function dismissAlert(alertId) {
-      alerts = alerts.filter(a => a.id !== alertId);
-      renderAlerts();
-      updateStatistics();
-    }
-
-    // Utility functions
-    function getRandomStatus() {
-      const statuses = [
-        { class: 'safe', text: 'Safe' },
-        { class: 'safe', text: 'Exploring' },
-        { class: 'warning', text: 'In Transit' },
-        { class: 'safe', text: 'At Hotel' }
-      ];
-      return statuses[Math.floor(Math.random() * statuses.length)];
-    }
-
-    function getRandomLocation() {
-      // Random locations in North-East India
-      const locations = [
-        { lat: 25.5788, lng: 91.8933 }, // Shillong
-        { lat: 27.3314, lng: 88.6138 }, // Gangtok
-        { lat: 26.1445, lng: 91.7362 }, // Guwahati
-        { lat: 25.6751, lng: 94.1086 }, // Imphal
-        { lat: 27.1024, lng: 93.6919 }  // Itanagar
-      ];
-      return locations[Math.floor(Math.random() * locations.length)];
-    }
-
-    // Dashboard actions
-    function refreshAllData() {
-      loadTourists();
-      loadAlerts();
-      updateStatistics();
-      alert('All data refreshed successfully!');
-    }
-
-    function exportReports() {
-      alert('Exporting emergency reports... (Feature coming soon)');
-    }
-
-    function viewMap() {
-      window.open('geofence.html', '_blank');
-    }
-
-    function refreshMap() {
-      alert('Map refreshed with latest tourist locations');
-    }
-
-    // WebSocket connection for real-time updates
-    function connectWebSocket() {
-      try {
-        wsConnection = new WebSocket('ws://localhost:3000');
-        
-        wsConnection.onopen = function() {
-          console.log('WebSocket connected to emergency system');
-        };
-        
-        wsConnection.onmessage = function(event) {
-          const data = JSON.parse(event.data);
-          if (data.type === 'emergency_alert') {
-            alerts.unshift(data.alert);
-            renderAlerts();
-            updateStatistics();
-            
-            // Show browser notification
-            if (Notification.permission === 'granted') {
-              new Notification('Emergency Alert!', {
-                body: `${data.alert.touristName}: ${data.alert.message}`,
-                icon: '/favicon.ico'
-              });
-            }
-          }
-        };
-        
-        wsConnection.onerror = function(error) {
-          console.log('WebSocket error:', error);
-        };
-        
-        wsConnection.onclose = function() {
-          console.log('WebSocket connection closed');
-          // Attempt to reconnect after 5 seconds
-          setTimeout(connectWebSocket, 5000);
-        };
-      } catch (error) {
-        console.log('WebSocket not available, using polling instead');
+  // Load emergency alerts
+  async function loadAlerts() {
+    try {
+      const response = await fetch('http://localhost:3000/api/emergency-alerts');
+      const data = await response.json();
+      if (data.success) {
+        alerts = data.alerts || [];
+        renderAlerts();
       }
+    } catch (error) {
+      console.error('Error loading alerts:', error);
+      showDemoAlerts();
+    }
+  }
+
+  // Render alerts panel
+  function renderAlerts() {
+    const alertsList = document.getElementById('alertsList');
+    if (!alerts.length) {
+      alertsList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:14px">No active alerts</div>';
+      return;
     }
 
-    // Request notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
+    alertsList.innerHTML = alerts.map(alert => `
+      <div class="alert-item ${alert.type === 'emergency' ? 'urgent' : ''}">
+        <div class="alert-header">
+          <span class="alert-type">${alert.type}</span>
+          <span class="alert-time">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+        </div>
+        <div class="alert-tourist">${alert.touristName} (ID: ${alert.blockchainId})</div>
+        <div class="alert-message">${alert.message}</div>
+        <div class="alert-location">
+          📍 Location: ${alert.location ? `${alert.location.lat.toFixed(4)}, ${alert.location.lng.toFixed(4)}` : 'Unknown'}
+        </div>
+        <div class="alert-actions">
+          <button class="alert-btn btn-respond" onclick="respondToAlert('${alert.id}')">Respond</button>
+          <button class="alert-btn btn-track" onclick="trackTourist('${alert.touristId}')">Track</button>
+          <button class="alert-btn btn-dismiss" onclick="dismissAlert('${alert.id}')">Dismiss</button>
+        </div>
+      </div>
+    `).join('');
+  }
 
-    // Initialize dashboard when page loads
-    window.addEventListener('load', initDashboard);
-  </script>
+  // Update map markers
+  function updateMapMarkers() {
+    tourists.forEach(tourist => {
+      const location = tourist.location || getRandomLocation();
+      const status = getTouristStatus(tourist);
+      const color = status.class === 'safe' ? 'green' : (status.class === 'warning' ? 'orange' : 'red');
+
+      if (touristMarkers[tourist.blockchain_id]) {
+        touristMarkers[tourist.blockchain_id].setLatLng([location.lat, location.lng]);
+        touristMarkers[tourist.blockchain_id].setStyle({ color });
+      } else {
+        touristMarkers[tourist.blockchain_id] = L.circleMarker([location.lat, location.lng], {
+          color,
+          radius: 8,
+          fillOpacity: 0.7
+        }).addTo(map)
+          .bindPopup(`<strong>${tourist.username}</strong><br>ID: ${tourist.blockchain_id}<br>Status: ${status.text}`);
+      }
+    });
+  }
+
+  // Update statistics
+  function updateStatistics() {
+    document.getElementById('activeTourists').textContent = tourists.length;
+    document.getElementById('emergencyAlerts').textContent = alerts.filter(a => a.type === 'emergency').length;
+    document.getElementById('resolvedToday').textContent = Math.floor(Math.random() * 10);
+    document.getElementById('responseTime').textContent = '2.3 min';
+  }
+
+  // Alert actions
+  function respondToAlert(alertId) {
+    alert(`Dispatching emergency response for alert ${alertId}`);
+  }
+  function trackTourist(touristId) {
+    alert(`Opening live tracking for tourist ${touristId}`);
+  }
+  function dismissAlert(alertId) {
+    alerts = alerts.filter(a => a.id !== alertId);
+    renderAlerts();
+    updateStatistics();
+  }
+
+  // Utility functions
+  function getTouristStatus(tourist) {
+    // Example: map backend status to class
+    if (!tourist.status) return { class: 'safe', text: 'Safe' };
+    if (tourist.status === 'emergency') return { class: 'danger', text: 'Emergency' };
+    if (tourist.status === 'warning') return { class: 'warning', text: 'In Transit' };
+    return { class: 'safe', text: tourist.status };
+  }
+  function getRandomLocation() {
+    const locations = [
+      { lat: 25.5788, lng: 91.8933 }, { lat: 27.3314, lng: 88.6138 },
+      { lat: 26.1445, lng: 91.7362 }, { lat: 25.6751, lng: 94.1086 },
+      { lat: 27.1024, lng: 93.6919 }
+    ];
+    return locations[Math.floor(Math.random() * locations.length)];
+  }
+
+  // Demo data
+  function showDemoAlerts() {
+    const demoAlerts = [
+      { id: 'demo1', type: 'emergency', touristName: 'Demo Tourist', blockchainId: 'DEMO123', message: 'Lost in forest.', location: { lat: 25.5788, lng: 91.8933 }, timestamp: new Date().toISOString() },
+      { id: 'demo2', type: 'emergency', touristName: 'Test User', blockchainId: 'TEST456', message: 'Car accident!', location: { lat: 26.1445, lng: 91.7362 }, timestamp: new Date(Date.now() - 300000).toISOString() }
+    ];
+    alerts = demoAlerts;
+    renderAlerts();
+  }
+  function showDemoTourists() {
+    tourists = [
+      { username: 'Demo Tourist', blockchain_id: 'DEMO123', status: 'safe', location: { lat: 25.5788, lng: 91.8933 } },
+      { username: 'Test User', blockchain_id: 'TEST456', status: 'warning', location: { lat: 26.1445, lng: 91.7362 } }
+    ];
+    renderTourists();
+    updateMapMarkers();
+  }
+
+  // WebSocket connection
+  function connectWebSocket() {
+    try {
+      wsConnection = new WebSocket('ws://localhost:3000');
+      wsConnection.onopen = () => console.log('WebSocket connected');
+      wsConnection.onmessage = event => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'emergency_alert') {
+          alerts.unshift(data.alert);
+          renderAlerts();
+          updateStatistics();
+          // Notification
+          if (Notification.permission === 'granted') {
+            const notif = new Notification('Emergency Alert!', { body: `${data.alert.touristName}: ${data.alert.message}` });
+            const audio = new Audio('https://www.soundjay.com/buttons/beep-07.mp3');
+            audio.play();
+          }
+        } else if (data.type === 'tourist_update') {
+          const idx = tourists.findIndex(t => t.blockchain_id === data.tourist.blockchain_id);
+          if (idx >= 0) tourists[idx] = data.tourist;
+          else tourists.push(data.tourist);
+          renderTourists();
+          updateMapMarkers();
+        }
+      };
+      wsConnection.onerror = err => console.error('WebSocket error:', err);
+      wsConnection.onclose = () => setTimeout(connectWebSocket, 5000);
+    } catch (err) {
+      console.error('WebSocket not available');
+    }
+  }
+
+  // Request notifications
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
+  window.addEventListener('load', initDashboard);
+</script>
+
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 </body>
 </html>

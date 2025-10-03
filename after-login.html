@@ -502,185 +502,112 @@
   </div>
 
   <script>
-    // Backend API configuration
     const API_BASE = 'http://localhost:3000/api';
-    
-    // DOM elements
     const form = document.getElementById('touristForm');
     const submitBtn = document.getElementById('submitBtn');
     const messageContainer = document.getElementById('messageContainer');
-    const container = document.querySelector('.container');
     const photoInput = document.getElementById('photoInput');
     const photoPreview = document.getElementById('photoPreview');
-
-    // Check if user is logged in
+    
     window.addEventListener('load', () => {
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       
-      if (isLoggedIn !== 'true' || !user.id) {
-        showMessage('Please login first to access this page. Click the login button below.', 'error');
-        // Hide form and show login button
+      if (!user.id) {
+        showMessage('Please login first to access this page.', 'error');
         form.style.display = 'none';
         document.getElementById('loginBtn').style.display = 'block';
         return;
       }
-
-      // Hide login button if user is logged in
+      
       document.getElementById('loginBtn').style.display = 'none';
       
-      // Check if profile already exists
-      if (user.blockchainId) {
-        // Show banner with assigned blockchain ID after registration
-        messageContainer.innerHTML = `
-          <div class="unique-id-display" style="animation: fadeUp .3s ease">
-            <h3>🎉 Your Unique Tourist ID</h3>
-            <div class="unique-id">${user.blockchainId}</div>
-            <p style="margin: 10px 0; color: #666;">This unique ID was assigned during registration. Complete your profile below to personalize your experience!</p>
-            <button onclick="window.location.href='dashboard.html'" style="background:#0073e6;color:#fff;padding:10px 18px;border:none;border-radius:8px;font-weight:700;cursor:pointer">Go to Dashboard →</button>
-          </div>
-        `;
-        document.getElementById('clearMessagesBtn').style.display = 'inline-block';
-        checkExistingProfile(user.blockchainId);
+      if (user.profileCompleted && user.blockchainId) {
+        form.style.display = 'none';
+        showProfileCompleted(user.blockchainId);
       }
     });
-
-    // Show message function
-    function showMessage(message, type = 'error') {
-      messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
-      // Show clear button when there's a message
-      document.getElementById('clearMessagesBtn').style.display = 'inline-block';
-      // No auto-hide, let user read the message
+    
+    // Show messages
+    function showMessage(msg, type='error') {
+      messageContainer.innerHTML = `<div class="message ${type}">${msg}</div>`;
     }
-
-    // Show loading state
-    function setLoading(loading) {
-      if (loading) {
-        container.classList.add('loading');
-        submitBtn.textContent = 'Processing...';
-        submitBtn.disabled = true;
-      } else {
-        container.classList.remove('loading');
-        submitBtn.textContent = 'Complete Profile & Generate Blockchain ID';
-        submitBtn.disabled = false;
+    
+    // Show profile completed block
+    function showProfileCompleted(blockchainId) {
+      messageContainer.innerHTML = `
+        <div class="profile-complete">
+          <h3>🎉 Profile Already Completed!</h3>
+          <p>Your unique Blockchain ID is:</p>
+          <div class="blockchain-id">${blockchainId}</div>
+          <button onclick="window.location.href='dashboard.html'" style="margin-top:10px;">Go to Dashboard →</button>
+        </div>
+      `;
+    }
+    
+    // Photo upload preview
+    photoInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+    
+      if (!file.type.startsWith('image/')) {
+        showMessage('Please select a valid image file');
+        return;
       }
-    }
-
-    // Check if profile already exists
-    async function checkExistingProfile(blockchainId) {
-      try {
-        const response = await fetch(`${API_BASE}/user/${blockchainId}`);
-        const data = await response.json();
-        
-        if (data.success && data.user.profile_completed) {
-          showMessage('Profile already completed! You can continue to the main page.', 'success');
-          
-          // Show continue button for completed profiles
-          messageContainer.innerHTML += `
-            <div style="text-align: center; margin-top: 20px;">
-              <button onclick="window.location.href='frontsheet.html'" style="background: #0073e6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                Continue to Main Page →
-              </button>
-            </div>
-          `;
-        }
-      } catch (error) {
-        console.log('Profile check failed:', error);
+      if (file.size > 5 * 1024 * 1024) {
+        showMessage('File size must be less than 5MB');
+        return;
       }
-    }
-
-    // Get selected interests
+    
+      const reader = new FileReader();
+      reader.onload = e => photoPreview.src = e.target.result;
+      reader.readAsDataURL(file);
+    });
+    
+    // Get interests
     function getSelectedInterests() {
-      const checkboxes = document.querySelectorAll('input[name="interests"]:checked');
-      return Array.from(checkboxes).map(cb => cb.value);
+      return Array.from(document.querySelectorAll('input[name="interests"]:checked')).map(cb => cb.value);
     }
-
-    // Photo upload handler
-    photoInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          showMessage('Photo size must be less than 5MB');
-          return;
-        }
-        
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          showMessage('Please select a valid image file');
-          return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          photoPreview.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
+    
     // Validate form
     function validateForm() {
-      const requiredFields = [
-        'fullName', 'dateOfBirth', 'phone', 'nationality', 'address',
-        'arrivalDate', 'departureDate', 'travelGroup', 'budget',
-        'accommodationType', 'preferredLocation'
+      const requiredIds = [
+        'fullName','dateOfBirth','phone','nationality','address',
+        'arrivalDate','departureDate','travelGroup','budget',
+        'accommodationType','preferredLocation'
       ];
-
-      for (const field of requiredFields) {
-        const element = document.getElementById(field);
-        if (!element.value.trim()) {
-          showMessage(`Please fill in ${element.previousElementSibling.textContent.replace('*', '').trim()}`);
-          element.focus();
+    
+      for (const id of requiredIds) {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) {
+          showMessage(`Please fill ${el.previousElementSibling.textContent.replace('*','')}`);
+          el.focus();
           return false;
         }
       }
-
-      // Validate date of birth
+    
       const dob = new Date(document.getElementById('dateOfBirth').value);
       const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      
-      if (age < 18) {
-        showMessage('You must be at least 18 years old to register');
-        return false;
-      }
-      
-      if (age > 100) {
-        showMessage('Please enter a valid date of birth');
-        return false;
-      }
-
-      // Validate dates
-      const arrivalDate = new Date(document.getElementById('arrivalDate').value);
-      const departureDate = new Date(document.getElementById('departureDate').value);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (arrivalDate < today) {
-        showMessage('Arrival date cannot be in the past');
-        return false;
-      }
-
-      if (departureDate <= arrivalDate) {
-        showMessage('Departure date must be after arrival date');
-        return false;
-      }
-
+      const age = today.getFullYear() - dob.getFullYear() - ((today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) ? 1 : 0);
+    
+      if (age < 18) { showMessage('You must be at least 18 years old'); return false; }
+      if (age > 100) { showMessage('Please enter a valid DOB'); return false; }
+    
+      const arrival = new Date(document.getElementById('arrivalDate').value);
+      const departure = new Date(document.getElementById('departureDate').value);
+      today.setHours(0,0,0,0);
+    
+      if (arrival < today) { showMessage('Arrival date cannot be in the past'); return false; }
+      if (departure <= arrival) { showMessage('Departure must be after arrival'); return false; }
+    
       return true;
     }
-
-    // Submit form
-    async function handleSubmit(e) {
+    
+    // Handle form submit
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-
-      if (!validateForm()) {
-        return;
-      }
-
+      if (!validateForm()) return;
+    
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const interests = getSelectedInterests();
-
       const profileData = {
         userId: user.id,
         personalInfo: {
@@ -689,7 +616,7 @@
           phone: document.getElementById('phone').value.trim(),
           nationality: document.getElementById('nationality').value,
           address: document.getElementById('address').value.trim(),
-          photo: photoPreview.src // Base64 encoded photo
+          photo: photoPreview.src
         },
         travelInfo: {
           arrivalDate: document.getElementById('arrivalDate').value,
@@ -702,74 +629,37 @@
           location: document.getElementById('preferredLocation').value,
           specialRequirements: document.getElementById('specialRequirements').value.trim()
         },
-        interests: interests,
+        interests: getSelectedInterests(),
         completedAt: new Date().toISOString()
       };
-
-      setLoading(true);
-
+    
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+    
       try {
-        const response = await fetch(`${API_BASE}/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(profileData)
         });
-
-        const data = await response.json();
-
+        const data = await res.json();
+    
         if (data.success) {
-          // Update user data with profile completion status
-          const updatedUser = { ...user, profileCompleted: true };
-          localStorage.setItem('user', JSON.stringify(updatedUser));
-          
-          // Show success message with blockchain ID
-          messageContainer.innerHTML = `
-            <div class="profile-complete">
-              <h3>🎉 Profile Completed Successfully!</h3>
-              <p>Your tourist profile has been encrypted and stored securely.</p>
-              <div class="blockchain-info">
-                <strong>Your Secure Blockchain ID:</strong><br>
-                <span class="blockchain-id">${data.blockchainId}</span><br>
-                <small>This ID is your secure identifier in our system</small>
-                <br><br>
-                <button onclick="window.location.href='dashboard.html'" style="background: #0073e6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-                  Continue to Dashboard →
-                </button>
-              </div>
-            </div>
-          `;
-
-          // Hide form and show completion
+          localStorage.setItem('user', JSON.stringify({ ...user, profileCompleted: true, blockchainId: data.blockchainId }));
           form.style.display = 'none';
-          
-          // Don't auto-redirect, let user choose when to continue
+          showProfileCompleted(data.blockchainId);
         } else {
-          showMessage(data.message || 'Failed to save profile. Please try again.');
+          showMessage(data.message || 'Profile submission failed');
         }
-      } catch (error) {
-        console.error('Profile submission error:', error);
-        showMessage('Connection error. Please make sure the server is running on localhost:3000');
+      } catch (err) {
+        console.error(err);
+        showMessage('Server not reachable. Make sure API is running.');
       } finally {
-        setLoading(false);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Complete Profile & Generate Blockchain ID';
       }
-    }
-
-
-    // Event listeners
-    form.addEventListener('submit', handleSubmit);
-
-    // Set minimum date to today
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('arrivalDate').setAttribute('min', today);
-    document.getElementById('departureDate').setAttribute('min', today);
-
-    // Update departure date minimum when arrival date changes
-    document.getElementById('arrivalDate').addEventListener('change', function() {
-      const arrivalDate = this.value;
-      document.getElementById('departureDate').setAttribute('min', arrivalDate);
     });
-  </script>
+    </script>
+    
 </body>
 </html>
